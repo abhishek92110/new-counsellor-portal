@@ -1,0 +1,180 @@
+
+.main{
+        height: 100%;
+        width: 100%;
+}
+.main-container{
+    display: grid;
+    grid-template-columns: 60% 40%;
+}
+
+.img-side{
+    padding: 0px;
+}
+
+.left-img {
+    background-image: url("./img/side-img.png");
+    height: 100vh;
+    width: 50vw;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    position: relative;
+    z-index: 1;
+}
+
+
+.button-side{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    width: 70%;
+    margin: auto;
+    row-gap: 50px;
+
+}
+
+
+.all-button{
+    padding: 10px;
+    display: flex;
+    column-gap: 20px;
+    
+}
+.bg-color1{
+    cursor: pointer;
+    width: 97px;
+    color: #fff;
+    background-color: #1367c8;
+}
+.bg-color1:hover{
+    cursor: pointer;
+   
+    color: #fff;
+    background-color: #0655b0;
+}
+.bg-color2{
+    cursor: pointer;
+    width: 97px;
+    color: #fff;
+    background-color: #ffaa16;
+}
+.bg-color2:hover{
+    cursor: pointer;
+    color: #fff;
+    background-color: #ec990a;
+}
+.bg-color3{
+    cursor: pointer;
+    width: 97px;
+    color: #fff;
+    background-color: #673bb7;
+}
+.bg-color3:hover{
+    cursor: pointer;
+    color: #fff;
+    background-color: #5c18da;
+}
+.bg-color4{
+    cursor: pointer;
+    width: 97px;
+    color: #fff;
+    background-color: #ff1616;
+}
+.bg-color4:hover{
+    cursor: pointer;    
+    color: #fff;
+    background-color: #b90303;
+}
+
+.button-side{
+    padding: 40px;
+}
+
+.form{
+    padding: 10px;
+}
+
+.username input{
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.password input{
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.forgetpassword{
+    display: flex;
+    justify-content: end;
+}
+.forgetpassword a{
+    text-decoration: none;
+    text-align: end;
+    /* padding: 10px; */
+}
+.submitbutton button{
+    margin-top: 10px;
+}
+
+.btn-group{
+    column-gap: 50px;
+    margin-bottom: 30px;
+}
+
+.p-30{
+    padding: 0 30px;
+}
+
+
+#datatable{
+    margin: 30px;
+}
+
+.cursor-pointer{
+    cursor: pointer;
+}
+   
+
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 900px) {
+    .main-container{
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: space-evenly;
+        
+    }
+    .box{
+        width: 30vw;
+        height: 30vh;
+    
+    }
+}
+@media screen and (max-width: 500px){
+    .main-container{
+        display: grid;
+        grid-template-columns: auto;
+        grid-row-gap: 16px;
+        margin-top: 25px;
+        
+    }
+    .box{
+        width: 54vw;
+        height: 53vh;
+    
+    }
+}

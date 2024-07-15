@@ -1,0 +1,60 @@
+
+.sub-container-forget{
+display: grid;
+grid-template-columns: 50% 50%;
+}
+
+.side-img{
+    padding: 0px;
+}
+
+.left-img-forget{
+    background-image: url("./img/side-img.png");
+    height: 100vh;
+    width: 50vw;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.side-text{
+
+    padding: 61px 20px 20px 119px;
+}
+.letus{
+    opacity: 0.6;
+    font-weight: 600;
+}
+.input-form{
+    padding-top: 40px;
+}
+.textcenter{
+    text-align: center;
+    opacity: 0.6;
+    width: 83%;
+}
+
+.input input{
+    width: 80%;
+    padding: 10px;
+}
+
+.submitbutton button{
+    width: 80%;
+    margin-top: 50px;
+}
+.login{
+    width: 100%;
+    text-align: center;
+    margin: 30px -50px;
+
+}
+.login a{
+    text-decoration: none;
+}

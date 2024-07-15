@@ -1,0 +1,28 @@
+@media screen and (max-width:600px){
+
+.content-body{
+    margin-left: 0;
+}
+
+#invoice-POS{
+    width: 100vw;
+}
+
+.invoice-POS img{
+    width: 25% !important;
+}
+
+#mid h1{
+    font-size: 16px;
+    margin:20px 0 !important;
+}
+
+#top{
+    margin-top: 20px;
+}
+
+.uncodemy-text{
+    font-size: 1.5rem;
+}
+
+}

@@ -26,7 +26,7 @@ const CounsellorDemoAdd = () => {
 
     fetchUser()
     
-  }, []);
+  }, [reScheduleStudentData]);
 
   const fetchUser = ()=>{
     if(localStorage.getItem("counsellor")){
@@ -64,11 +64,41 @@ const CounsellorDemoAdd = () => {
       // setINP({...inpval, ["demoStudent"]:totalLead.totalLead})
       // setINP({...inpval, ["totalCount"]:totalLead.totalCount})
 
+      if((totalLead.totalLead).length>0){
+
       setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
       console.log("lead count =",totalLead.totalLead);
       setBtnStatus("today-added-demo")
+      }
+      else{
+        setINP(
+          {
+            Course: "",
+    Count:"",
+    Day: "",
+    date: "",
+    Course: "",
+    subCourse: "",
+    Counselor: "",
+    counselorNo: "",
+    month: "",
+    year: "",
+    totalCount:0,
+    demoStudent:[],
+    name:"",
+    mobile:"",
+    trainer:"",
+    status:"",
+    reSchedule:""
+          }
+        )
+
+        console.log("inside else")
+      }
     }
       catch(error){
+
+        console.log("error message =",error.message)
 
       }
   }
@@ -90,10 +120,10 @@ const CounsellorDemoAdd = () => {
       // setINP({...inpval, ["demoStudent"]:totalLead.totalLead})
       // setINP({...inpval, ["totalCount"]:totalLead.totalCount})
 
-      setReScheduleStudent(totalLead.totalLead.demoStudent)
+      setReScheduleStudent(totalLead.totalLead[0].demoStudent)
 
       // setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
-      console.log("reschedule data =",totalLead.totalLead);
+      console.log("reschedule data =",totalLead.totalLead, totalLead.totalLead[0].demoStudent);
       setBtnStatus("today-added-demo")
     }
       catch(error){
@@ -218,6 +248,41 @@ const CounsellorDemoAdd = () => {
 
   };
 
+  // update reschedule function
+
+  const updateReschedule = async()=>{
+
+    try{
+
+      const res = await fetch(`http://localhost:8000/counselorUpdateDemoReschedule`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": localStorage.getItem("counsellor")
+        },
+        body: JSON.stringify(reScheduleStudentData),
+      });
+    
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg("Demo");
+  
+}
+catch(error){
+
+  ContextValue.updateProgress(100);
+    ContextValue.updateBarStatus(false);
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Something went wrong!",
+    });
+
+}
+
+
+  }
+
 // sending data to db and sending mail also
 
   const addinpdataMail = async (e) => {
@@ -262,12 +327,12 @@ const CounsellorDemoAdd = () => {
 
       // const data = await res.json();
 
-      console.log("progress bar 100")
+      console.log("progress bar 100", res.status)
 
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      SuccessMsg("Demo");
+      
 
+
+      if(res.status){
       if(reScheduleStudent.length>0){
 
         let tempDemoStudent;
@@ -285,13 +350,24 @@ const CounsellorDemoAdd = () => {
           body: JSON.stringify(reScheduleStudent),
         });
       
-
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        SuccessMsg("Demo");
 
     
   }catch(error){
 
+    ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+
   }
 }
+    }
     }
     catch(error) {
       ContextValue.updateProgress(100);
@@ -325,7 +401,7 @@ const CounsellorDemoAdd = () => {
   // swal add done status 
 
 
-  const addRescheduleDate = (index)=>{
+  const addRescheduleDate = (index,from)=>{
 
     console.log(' index of student =',index)
     Swal.fire({
@@ -343,11 +419,28 @@ const CounsellorDemoAdd = () => {
         if (result.isConfirmed) {
 
           const rescheduleDate = document.getElementById('rescheduleDate').value;
-          let tempInpVal = inpval;
-          tempInpVal.demoStudent[index].reschedule = rescheduleDate;
-          setINP(tempInpVal)
 
-          console.log("set inp data =",tempInpVal)
+          if(from=="fromAddedDemo"){
+
+            console.log("from  if=",from)
+            let tempInpVal = inpval;
+          tempInpVal.demoStudent[index].reschedule = rescheduleDate;
+          setINP(tempInpVal);
+
+          }
+
+          else{
+
+            console.log("from  else=",from)
+
+            let tempReschedule = reScheduleStudentData;
+            tempReschedule[index].reschedule = rescheduleDate
+
+            console.log("reschedule date =",tempReschedule)
+
+            setReScheduleStudent(tempReschedule)
+          }
+          
 
             // addNewSubCourse(courseName,courseCode,mainCourse)
           Swal.fire({
@@ -466,10 +559,27 @@ const CounsellorDemoAdd = () => {
     setINP(tempInpVal)
 
     if(value=="ReScheduled"){
-      addRescheduleDate(index)
+      addRescheduleDate(index, "fromAddedDemo")
     }
 
     
+
+  }
+
+  // update status of reschedule status function
+
+  const setRescheduleStatus =(value,index)=>{
+
+    let tempInpVal  = reScheduleStudentData;
+    console.log("indexing value =",reScheduleStudentData[index])
+    tempInpVal[index].status = value;
+    console.log("status value =",index,value, tempInpVal)
+
+    setReScheduleStudent(tempInpVal)
+
+    if(value=="ReScheduled"){
+      addRescheduleDate(index,"updateReschedule")
+    }
 
   }
 
@@ -693,7 +803,7 @@ const CounsellorDemoAdd = () => {
 
         </div>
 
-       {(btnStatus=="today-added-demo" || btnStatus=="add-demo" || inpval) && <div className="content-body">
+       {(btnStatus=="today-added-demo" || btnStatus=="add-demo") && <div className="content-body">
         <h3 className="p-30">Today Added Demo</h3>
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
@@ -755,14 +865,16 @@ const CounsellorDemoAdd = () => {
           <th>Name</th>
           <th>Course</th>
           <th>Date</th>
+          <th>Reschedule Date</th>
           <th>Status</th>
           </tr>
-      {inpval.demoStudent.map((element,index)=>{
+      {reScheduleStudentData && reScheduleStudentData.map((element,index)=>{
         return(
           <tr>
          <td> {element.name} </td>
          <td> {element.course} </td>
-         <td> {inpval.date} </td>
+         <td> {element.scheduleDate} </td>
+         <td> {element.reschedule} </td>
          <td>
          <select
                         id="exampleInputPassword1"
@@ -770,7 +882,7 @@ const CounsellorDemoAdd = () => {
                         name="leadfrom"
                         class="custom-select mr-sm-2"
                         defaultValue={element.status}
-                        onChange={(e)=>{setDemoStatus(e.target.value,index)}}
+                        onChange={(e)=>{setRescheduleStatus(e.target.value,index)}}
                       
                     >
                         <option disabled>--select Demo Status--</option>
@@ -787,6 +899,18 @@ const CounsellorDemoAdd = () => {
         )
       })}
       </table>
+      
+      <div className="d-flex">
+      <button
+                            type="submit"
+                            onClick={updateReschedule}
+                            className="btn btn-primary"            
+                            // disabled={allFieldStatus===false?true:false}
+                          >
+                           Update Rescheduled Demo
+                          </button>
+                          </div>
+
         </div>}
       </div>
     </>

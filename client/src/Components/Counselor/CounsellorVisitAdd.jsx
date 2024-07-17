@@ -15,6 +15,7 @@ const CounsellorVisitAdd = () => {
   const [methodStatus, setMethodStatus] = useState();
   const [allFieldStatus, setAllFieldStatus] = useState(false);
   const [counselor, setCounselor] = useState();
+  const [visitTotalCount, setTotalVisitCount] = useState(0)
   // const location = useLocation();
   // const { counselor } = location.state;
 
@@ -60,25 +61,26 @@ const CounsellorVisitAdd = () => {
   const [inpval, setINP] = useState({
     Course: "",
     visitResponse:"",
+    visitStatus:"Scheduled",
     Count:"",
     Day: "",
     date: "",
-    Course: "",
-    subCourse: "",
     Counselor: "",
     counselorNo: "",
+    visitDate:"",
+    visitTrainer:"",
+    visitCounsellor:"",
+    name:"",
     month: "",
     year: "",
-    totalCount:0,
-    Visit:[],
     name:"",
     mobile:"",
     trainer:"",
-    status:"",
-    reSchedule:"",
     visitcounsellor:"",
     visittrainer:""
   });
+
+  const [visitData, setVisitData] = useState([])
 
   function isAllFieldsFilled() {
     for (const key in inpval) {
@@ -96,38 +98,37 @@ const CounsellorVisitAdd = () => {
 
   // delete course lead function
 
-  const deleteCourseLead =(courseName, lead)=>{
+  const deleteCourseLead =(name, mobile)=>{
 
-    console.log("course name =",courseName)
-
-    let tempcourseLead = inpval.Visit.filter(data=>{
-      return (!(data.course==courseName && data.lead==lead))
+    let tempcourseLead = visitData.filter(data=>{
+      return (!(data.name==name && data.mobile==mobile))
     })
 
     console.log("temp course lead =",tempcourseLead)
 
-    let totalcount = 0;
+    let totalcount = tempcourseLead.length;
 
-    tempcourseLead.map(data=>{
-
-      totalcount = totalcount + parseInt(data.count)
-
-    })
-
-    setINP({ ...inpval, ["course"]: tempcourseLead, ["totalCount"]:totalcount});
+    setVisitData(tempcourseLead)
+    setTotalVisitCount(totalcount)
 
   }
 
   const addinpdata = async (e) => {
     e.preventDefault();
-    let tempCourseLead = inpval.Visit;
+
+    console.log("inpval data =",inpval)
+
+    let tempVisitData = visitData;
 
     let prevnameMobile = false;
 
-    tempCourseLead.map(data=>{
-      if(data.name==inpval.name && data.mobile==inpval.mobile){
-        data.course=inpval.subCourse
+    tempVisitData.map(data=>{
+
+      if(data.name==inpval.name && data.mobile==inpval.mobile)
+        {
+        data.Course=inpval.Course
         data.visitResponse=inpval.visitResponse
+        data.visitDate=inpval.visitDate
         data.name = inpval.name
         data.mobile = inpval.mobile
         data.visittrainer = inpval.visittrainer
@@ -140,28 +141,158 @@ const CounsellorVisitAdd = () => {
 
     if(!prevnameMobile){
 
-    let tempObj = {
-        course:inpval.subCourse,
-        visitResponse:inpval.visitResponse,
-        name : inpval.name,
-        mobile : inpval.mobile,
-        visittrainer : inpval.visittrainer,
-        visitcounsellor : inpval.visitcounsellor,
-        status : inpval.status,
-        reschedule : inpval.reSchedule
-    }
 
-    tempCourseLead.push(tempObj);
+
+    tempVisitData.push(inpval);
   }
 
-  let totalcount = tempCourseLead.length;
+  let totalcount = tempVisitData.length;
+  console.log("total visit data =",tempVisitData)
+
+  setVisitData(tempVisitData)
 
   
-    setINP({ ...inpval, ["course"]: tempCourseLead, ["totalCount"]:totalcount});
+    setTotalVisitCount(totalcount)
+    // setINP({ ...inpval, ["course"]: tempCourseLead, ["totalCount"]:totalcount});
     console.log("inpval data =",inpval)
     
 
   };
+
+  // function to get detail on done status
+
+
+  const getDoneStatus = (index) => {
+    console.log('index of student =', index);
+    
+    Swal.fire({
+      title: 'Post Visit Details',
+      html: `
+        <input id="trainerInput" type="text" class="swal2-input" placeholder="Visit Trainer">
+        <input id="counselorSelect" type="text" class="swal2-input" placeholder="Visit Counsellor">
+        <select id="responseInput" class="swal2-input">
+          <option value="" disabled selected>Select Visit Response</option>
+          <option value="Registered">Registered</option>
+          <option value="Follow Up">Follow Up</option>
+          <option value="Not Interested">Not Interested</option>
+        </select>
+        
+      `,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        const trainerInput = document.getElementById('trainerInput').value;
+        const counselorSelect = document.getElementById('counselorSelect').value;
+        const responseInput = document.getElementById('responseInput').value;
+        
+        if (!trainerInput || !counselorSelect || !responseInput) {
+          Swal.showValidationMessage('Please enter all details');
+          return false;
+        }
+
+        
+        return {
+          trainerInput,
+          counselorSelect,
+          responseInput
+        };
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { trainerInput, counselorSelect, responseInput } = result.value;
+
+        let tempVisitData = visitData;
+        console.log("tempVisit data =",tempVisitData, visitData)
+        tempVisitData[index].visitCounsellor =counselorSelect;
+        tempVisitData[index].visitTrainer =trainerInput;
+        tempVisitData[index].visitResponse =responseInput;
+
+
+        setVisitData(tempVisitData)
+
+        
+        // Add logic to handle the rescheduled details
+        console.log('Trainer:', trainerInput);
+        console.log('Counselor:', counselorSelect);
+        console.log('Response:', responseInput);
+        
+        Swal.fire({
+          title: 'Details Added',
+          text: `Trainer: ${trainerInput}, Counselor: ${counselorSelect}, Response: ${responseInput}`
+        });
+      }
+    });
+  };
+  
+
+  // function to get revisit date
+
+  const getReVisitDate = (index)=>{
+
+    console.log(' index of student =',index)
+    Swal.fire({
+        title: 'Add Revisit Date',
+        html:
+            '<input id="reVisitDate" type="date" class="swal2-input" placeholder="Add Date">',
+        inputAttributes: {
+          autocapitalize: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          const reVisitDate = document.getElementById('reVisitDate').value;          
+          
+
+          let tempVisitData = visitData;
+          tempVisitData[index].visitDate = reVisitDate 
+
+          setVisitData(tempVisitData)
+
+            // addNewSubCourse(courseName,courseCode,mainCourse)
+          Swal.fire({
+            title: `Re Visit Date has been added`,
+            
+            imageUrl: result.value.avatar_url
+          })
+        }
+      })
+  }
+
+  // function to get visit data
+
+  const getVisitData = async()=>{
+
+    // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
+
+    try{
+      let totalLead = await fetch('http://localhost:8000/getcounselorVisitCount',{
+        method:'GET',
+        headers:{
+          "counselorNo":localStorage.getItem("counsellorNo"),
+          "startDate":inpval.date,
+          "endDate":inpval.date
+        }
+      })
+  
+      totalLead = await totalLead.json();
+      setVisitData(totalLead.totalLead)
+      setTotalVisitCount(totalLead.totalCount)
+      console.log("lead count =",totalLead);
+    }
+      catch(error){
+
+      }
+
+  }
 
 // sending data to db and sending mail also
 
@@ -171,18 +302,18 @@ const CounsellorVisitAdd = () => {
     ContextValue.updateBarStatus(true);
 
     e.preventDefault();
-    let tempInpVal = inpval;
-    console.log("lead date is  =",tempInpVal.date)
-    let dateArray = tempInpVal.date.split("-");
-    console.log("registration array =", dateArray);
-    tempInpVal.date = dateConvert(tempInpVal.date);
-    tempInpVal.month = dateArray[1];
-    tempInpVal.year = dateArray[0];
-    tempInpVal.Day = dateArray[2];
+    // let tempInpVal = inpval;
+    // console.log("lead date is  =",tempInpVal.date)
+    // let dateArray = tempInpVal.date.split("-");
+    // console.log("registration array =", dateArray);
+    // tempInpVal.date = dateConvert(tempInpVal.date);
+    // tempInpVal.month = dateArray[1];
+    // tempInpVal.year = dateArray[0];
+    // tempInpVal.Day = dateArray[2];
 
-    tempInpVal.date = `${tempInpVal.year}-${tempInpVal.month}-${tempInpVal.Day}`
+    // tempInpVal.date = `${tempInpVal.year}-${tempInpVal.month}-${tempInpVal.Day}`
 
-    console.log("register value =", tempInpVal);
+    // console.log("register value =", tempInpVal);
 
 
     try {
@@ -196,7 +327,7 @@ const CounsellorVisitAdd = () => {
           "Content-Type": "application/json",
           "auth-token": localStorage.getItem("counsellor")
         },
-        body: JSON.stringify(tempInpVal),
+        body: JSON.stringify(visitData),
       });
 
       // ContextValue.updateProgress(60);
@@ -335,10 +466,30 @@ const CounsellorVisitAdd = () => {
     }
   };
 
+  const setVisitStatus =(name, value, index)=>{
+    console.log("inside visit status", value)
+    let tempvisitData = visitData;
+    tempvisitData[index].visitStatus  = value;
+
+    setVisitData(tempvisitData)
+
+    if(value=="Re Visit")
+    {
+      console.log("inside if condition",value)
+      getReVisitDate(index)
+      
+    }
+      else if(value=="Done"){
+      console.log("inside else if condition",value)
+
+        getDoneStatus(index)
+      }
+  }
+
   return (
     <>
       <Header />
-      <div className="sidebar-main-container">
+      <div className="sidebar-main-container flex-col">
         <HashLoader color="#3c84b1" />
         {/* <Cslidebar /> */}
         {/* <div className='pos-center'>
@@ -352,14 +503,14 @@ const CounsellorVisitAdd = () => {
               <div className="col-sm-6 p-md-0">
                 <div className="welcome-text">
                   <h4>Add Visit</h4>
-                  <h4>Total Visit: {inpval.totalCount}</h4>
+                  <h4>Total Visit: {visitTotalCount}</h4>
                 </div>
               </div>
 
               <div className="col-lg-6 col-md-6 col-sm-12">
                           <div className="form-group">
                             <label className="form-label">
-                             Visit Date
+                             Date
                             </label>
                             <input
                               type="date"
@@ -376,7 +527,10 @@ const CounsellorVisitAdd = () => {
                               aria-describedby="emailHelp"
                             />
                           </div>
+                          <button onClick={getVisitData} className="btn btn-primary">Search</button>
                         </div>
+
+                        
 
               
               
@@ -434,11 +588,11 @@ const CounsellorVisitAdd = () => {
                         </div>
                         <div className="col-lg-6 col-md-6 col-sm-12">
                           <div className="form-group">
-                            <label className="form-label">Trainer Name</label>
+                            <label className="form-label">
+                             Visit Date
+                            </label>
                             <input
-                              type="text"
-                              max="10"
-                              value={inpval.trainer}
+                              type="date"
                               onChange={(e) => {
                                 setINP({
                                   ...inpval,
@@ -446,9 +600,10 @@ const CounsellorVisitAdd = () => {
                                 });
                                 
                               }}
-                              name="trainer"
+                              name="visitDate"
                               class="form-control"
-                              id="exampleInputPassword1"
+                              id="exampleInputEmail1"
+                              aria-describedby="emailHelp"
                             />
                           </div>
                         </div>
@@ -462,7 +617,7 @@ const CounsellorVisitAdd = () => {
                                 type="select"
                                 name="Course"
                                 class="form-control"
-                                onChange={(e) => setMainCourse(e.target.value)}
+                                onChange={(e) => {setINP({...inpval, [e.target.name]:e.target.value})}}
                               >
                                 <option disabled selected>
                                   --select Course Name--
@@ -475,29 +630,6 @@ const CounsellorVisitAdd = () => {
                           </div>
                         </div>
                        
-                       
-                            
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                        <label className="form-label">
-                              Visit Status
-                            </label>
-                        <select
-                        id="exampleInputPassword1"
-                        type="select"
-                        name="leadfrom"
-                        class="custom-select mr-sm-2"
-                        onChange={(e)=>{setINP({...inpval, ["status"]:e.target.value})}}
-                      
-                    >
-                        <option disabled selected>--Select Visit Status--</option>
-                    
-                                <option value="Done" >Done</option>
-                                <option value="Not Joined" >Not Joined</option>                       
-                                <option value="ReScheduled" >ReScheduled</option>                      
-                        
-                    </select>
-                        </div>
-
                         {inpval.status=="Done" && 
                         <>
                         <div className="col-lg-6 col-md-6 col-sm-12">
@@ -602,17 +734,7 @@ const CounsellorVisitAdd = () => {
                           >
                             Add Visit
                           </button>
-                          <button
-                            type="submit"
-                            onClick={addinpdataMail}
-                            className="btn btn-primary"            
-                            // disabled={allFieldStatus===false?true:false}
-                          >
-                            Submit Visit
-                          </button>
-                          <button type="submit" className="btn btn-light">
-                            Cancel
-                          </button>
+                        
                         </div>
                     </form>
                   </div>
@@ -628,23 +750,54 @@ const CounsellorVisitAdd = () => {
 
         </div>
 
-       {(inpval.Visit).length>0 && <div className="content-body">
+       {visitData.length>0 && <div className="content-body">
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
           <th>Course</th>
-          <th>Count</th>
+          <th>Name</th>
+          <th>Visit Date</th>
+          <th>Status</th>
           <th>Delete</th>
           </tr>
-      {inpval.Visit.map((element,index)=>{
+      {visitData.map((element,index)=>{
         return(
           <tr>
-         <td> {element.course} </td>
-         <td> {element.count} </td>
-         <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.course, element.lead)}}> X </td>
+         <td> {element.Course} </td>
+         <td> {element.name} </td>
+         <td> {element.visitDate} </td>
+         <select
+                        id="exampleInputPassword1"
+                        type="select"
+                        name="leadfrom"
+                        class="custom-select mr-sm-2"
+                        defaultValue={element.visitStatus}
+                        onChange={(e)=>setVisitStatus(e.target.name, e.target.value, index)}
+                      
+                    >
+                        <option disabled>--Select Visit Status--</option>
+                    
+                                <option value="Done" >Done</option>
+                                <option value="Not Joined" >Not Joined</option>                       
+                                <option value="Re Visit" >Re Visit</option>                      
+                                <option value="Scheduled" >Scheduled</option>                      
+                        
+                    </select>
+         <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.name, element.mobile)}}> X </td>
          </tr>
         )
       })}
       </table>
+
+      <div className="d-flex">
+      <button
+                            type="submit"
+                            onClick={addinpdataMail}
+                            className="btn btn-primary"            
+                            // disabled={allFieldStatus===false?true:false}
+                          >
+                            Submit Visit
+                          </button>
+      </div>
         </div>}
       </div>
     </>

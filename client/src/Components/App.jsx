@@ -100,6 +100,8 @@ import AllLead from './AllLead'
 import CounsellorDemo from './CounsellorDemo'
 import CounsellorVisitAdd from './Counselor/CounsellorVisitAdd'
 import CounselorVisit from './CounselorVisit'
+import CounsellorFollowUpAdd from './Counselor/CounsellorFollowUpAdd'
+import CounsellorFollowUp from './CounsellorFollowUp'
 
 // import Navbaar from './components/Navbaar';
 export default function App() {
@@ -121,11 +123,13 @@ export default function App() {
             <Route exact path='/counsellor/Add-Counsellor-Lead' element={<CounsellorLeadAdd/>} />
             <Route exact path='/counsellor/Add-Counsellor-Demo' element={<CounsellorDemoAdd/>} />
             <Route exact path='/counsellor/Add-Counsellor-Visit' element={<CounsellorVisitAdd/>} />
+            <Route exact path='/counsellor/Add-Counsellor-FollowUp' element={<CounsellorFollowUpAdd/>} />
             <Route exact path='Registered-Student/Add-Registered-Student' element={<AddRegisteredStudent/>} />
             {/* <Route exact path='admin/AllCourse' element={<AllCourse />} /> */}
             <Route exact path='/counsellor/AllLead' element={<AllLead />} />
             <Route exact path='/counsellor/AllDemo' element={<CounsellorDemo />} />
             <Route exact path='/counsellor/AllVisit' element={<CounselorVisit />} />
+            <Route exact path='/counsellor/AllFollowUp' element={<CounsellorFollowUp />} />
             <Route exact path='admin/AllBatchTiming' element={<AllBatchTiming />} />
             <Route exact path='/counsellor/Registered-Student' element={<RegisterStudent />} />
             {/* <Route exact path='admin/Registered-Student/Add-Registered-Student' element={<RegisterStudent />} /> */}

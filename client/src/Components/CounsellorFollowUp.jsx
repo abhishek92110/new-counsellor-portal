@@ -8,7 +8,7 @@ import Swal from 'sweetalert2'
 // import Home from '../Components/Home'
 // import Header from '../Components/Header'
 
-export default function CounselorVisit() {
+export default function CounsellorFollowUp() {
 
   const location = useLocation();
   let { totalLead, status } = location.state;
@@ -263,6 +263,8 @@ export default function CounselorVisit() {
           <th>Course</th>
           <th>Name</th>
           <th>Mobile</th>
+          <th>Date</th>
+          <th>Remark</th>
           <th>Status</th>
           </tr>
       {data.visitstudent.map((element,index)=>{
@@ -271,7 +273,9 @@ export default function CounselorVisit() {
          <td> {element.Course} </td>
          <td> {element.name} </td>
          <td> {element.mobile} </td>
-         <td> {element.visitStatus} </td>
+         <td> {element.date} </td>
+         <td> {element.remark} </td>
+         <td> {element.status} </td>
          </tr>
         )
       })}
@@ -283,7 +287,6 @@ export default function CounselorVisit() {
 </div>
 </td>
                                       
-
                                     </tr>
                                   )
                                 })
@@ -296,16 +299,6 @@ export default function CounselorVisit() {
                           </div>
                         </div>
                       </div>
-
-
-
-
-
-
-
-
-
-
                     </div>
                   </div>
 

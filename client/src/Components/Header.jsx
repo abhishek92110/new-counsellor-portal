@@ -35,7 +35,9 @@ export default function Header() {
 
             <a
               className="navbar-brand me-2 mb-1 d-flex align-items-center"
-              href="#"
+              onClick={()=>{
+                navigation('/counsellor')
+              }}
             >
               <img className='uncodemy'
                 src={logo}

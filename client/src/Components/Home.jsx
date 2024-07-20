@@ -232,7 +232,19 @@ export default function Home() {
       totalLead = await totalLead.json();
       setTotalDemo(totalLead.totalLead)
       setDemoCount(totalLead.totalCount)
-      console.log("lead count =",totalLead);
+
+      let totalReschedule = await fetch('http://localhost:8000/getcounselorDemoReschedule',{
+        method:'GET',
+        headers:{
+          "counselorNo":localStorage.getItem("counsellorNo"),
+          "startDate":rangeDate.startDate,
+          "endDate":rangeDate.endDate
+        }
+      })
+
+      totalReschedule = await totalReschedule.json();
+
+      console.log("demo count  =",totalLead, totalReschedule);
     }
       catch(error){
 
@@ -258,8 +270,8 @@ export default function Home() {
   
       totalLead = await totalLead.json();
       setTotalVisit(totalLead.totalLead)
-      setVisitCount(totalLead.totalCount)
-      console.log("lead count =",totalLead);
+      setVisitCount(totalLead.totalLead.length)
+      console.log("visit count =",totalLead);
     }
       catch(error){
 
@@ -288,7 +300,7 @@ export default function Home() {
       totalLead = await totalLead.json();
       setTotalFollowUp(totalLead.totalLead)
       setFollowUpCount(totalLead.totalCount)
-      console.log("lead count =",totalLead);
+      console.log("follow up count =",totalLead);
     }
       catch(error){
 
@@ -361,15 +373,10 @@ export default function Home() {
     let fetchData = await sendData.json();
   };
 
-
-
   //sweetalert
 
   //Delete student
 
-
- 
- 
   //search
   const fetchQueryData = (Query) => {
     if (user === "student") {
@@ -452,7 +459,7 @@ export default function Home() {
     navigate("AllVisit", { state: { totalLead: data, status:status } });
   };
   const moveToRegisterStudent = (data, status) => {
-    navigate("AllVisit", { state: { totalLead: data, status:status } });
+    navigate("AllFollowUp", { state: { totalLead: data, status:status } });
   };
   const moveToAddStudent = () => {
     navigate("Add-Counsellor-Lead");
@@ -654,6 +661,25 @@ return (`${year}-${month}-${day}`)
                     </div>
                   </div>
                 </div>  
+
+                <div className="col-xl-3 col-xxl-3 col-sm-6">
+                  <div className="widget-stat card p-0 bg-secondary">
+                    <div className="card-body" onClick={()=>{navigate("Add-Counsellor-FollowUp");}}>
+                      <div className="media">
+                        <span className="mr-3">
+                        <i class="fa-solid fa-plus"/>
+                        </span>
+                        <div
+                          className="media-body text-white"
+                          
+                        >
+                          <p className="mb-1">Add Today Follow Up</p>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div> 
 
                 <div className="col-xl-3 col-xxl-3 col-sm-6">
               <div className="widget-stat card p-0 bg-secondary">

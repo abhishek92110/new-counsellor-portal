@@ -6,7 +6,7 @@ import Header from "../Header";
 import Swal from "sweetalert2";
 import { HashLoader } from "react-spinners";
 
-const CounsellorVisitAdd = () => {
+const CounsellorFollowUpAdd = () => {
   let navigate = useNavigate();
 
   const [allcourse, setAllCourse] = useState();
@@ -16,9 +16,6 @@ const CounsellorVisitAdd = () => {
   const [allFieldStatus, setAllFieldStatus] = useState(false);
   const [counselor, setCounselor] = useState();
   const [visitTotalCount, setTotalVisitCount] = useState(0)
-  const [btnStatus, setBtnStatus] = useState("Today-Visit")
-  const [RevisitData, setRevisitData] = useState()
-  const [revisitCount, setTotalRevisitCount] = useState(0)
   // const location = useLocation();
   // const { counselor } = location.state;
 
@@ -63,24 +60,18 @@ const CounsellorVisitAdd = () => {
 
   const [inpval, setINP] = useState({
     Course: "",
-    visitResponse:"",
-    visitStatus:"Scheduled",
-    Count:"",
     Day: "",
     date: "",
-    Counselor: "",
     counselorNo: "",
-    visitDate:"",
-    visitTrainer:"",
-    visitCounsellor:"",
     name:"",
     month: "",
     year: "",
     name:"",
     mobile:"",
-    trainer:"",
-    visitcounsellor:"",
-    visittrainer:""
+    status:"Added",
+    remark:"",
+    FollowUp:[],
+    lastFollowUpDate:"",
   });
 
   const [visitData, setVisitData] = useState([])
@@ -123,6 +114,13 @@ const CounsellorVisitAdd = () => {
 
     let tempVisitData = visitData;
 
+    let obj = {
+      date:inpval.date,
+      remark: inpval.remark
+    }
+
+    tempVisitData.FollowUp.push(obj)
+
     let prevnameMobile = false;
 
     tempVisitData.map(data=>{
@@ -130,14 +128,15 @@ const CounsellorVisitAdd = () => {
       if(data.name==inpval.name && data.mobile==inpval.mobile)
         {
         data.Course=inpval.Course
-        data.visitResponse=inpval.visitResponse
-        data.visitDate=""
+        data.date  = inpval.date
         data.name = inpval.name
         data.mobile = inpval.mobile
-        data.visittrainer = inpval.visittrainer
-        data.visitcounsellor = inpval.visitcounsellor
         data.status = inpval.status
-        data.reschedule = inpval.reSchedule
+        data.remark = inpval.remark
+        data.FollowUp = {
+          date:inpval.date,
+          remark:inpval.remark
+        };
         prevnameMobile = true;
       }
     })
@@ -163,7 +162,7 @@ const CounsellorVisitAdd = () => {
   // function to get detail on done status
 
 
-  const getDoneStatus = (index, from) => {
+  const getDoneStatus = (index) => {
     console.log('index of student =', index);
     
     Swal.fire({
@@ -207,7 +206,6 @@ const CounsellorVisitAdd = () => {
       if (result.isConfirmed) {
         const { trainerInput, counselorSelect, responseInput } = result.value;
 
-        if(from=="from today visit"){
         let tempVisitData = visitData;
         console.log("tempVisit data =",tempVisitData, visitData)
         tempVisitData[index].visitCounsellor =counselorSelect;
@@ -216,18 +214,6 @@ const CounsellorVisitAdd = () => {
 
 
         setVisitData(tempVisitData)
-      }
-
-      else{
-        let tempReVisitData = RevisitData;
-        console.log("tempVisit data =",tempReVisitData, RevisitData)
-        tempReVisitData[index].visitCounsellor =counselorSelect;
-        tempReVisitData[index].visitTrainer =trainerInput;
-        tempReVisitData[index].visitResponse =responseInput;
-
-
-        setRevisitData(tempReVisitData)
-      }
 
         
         // Add logic to handle the rescheduled details
@@ -246,7 +232,7 @@ const CounsellorVisitAdd = () => {
 
   // function to get revisit date
 
-  const getReVisitDate = (index, from)=>{
+  const getReVisitDate = (index)=>{
 
     console.log(' index of student =',index)
     Swal.fire({
@@ -266,19 +252,10 @@ const CounsellorVisitAdd = () => {
           const reVisitDate = document.getElementById('reVisitDate').value;          
           
 
-          
+          let tempVisitData = visitData;
+          tempVisitData[index].visitDate = reVisitDate 
 
-          if(from=="from today visit"){
-            let tempVisitData = visitData;
-            tempVisitData[index].visitDate = reVisitDate 
-  
-            setVisitData(tempVisitData)
-            }
-            else{
-              let tempRevisitData = RevisitData;
-              tempRevisitData[index].visitDate  = reVisitDate;
-              setRevisitData(tempRevisitData)
-            }
+          setVisitData(tempVisitData)
 
             // addNewSubCourse(courseName,courseCode,mainCourse)
           Swal.fire({
@@ -297,7 +274,7 @@ const CounsellorVisitAdd = () => {
     // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
-      let totalLead = await fetch('http://localhost:8000/getcounselorVisitCount',{
+      let totalLead = await fetch('http://localhost:8000/getcounselorFollowUpCount',{
         method:'GET',
         headers:{
           "counselorNo":localStorage.getItem("counsellorNo"),
@@ -309,8 +286,6 @@ const CounsellorVisitAdd = () => {
       totalLead = await totalLead.json();
       setVisitData(totalLead.totalLead)
       setTotalVisitCount(totalLead.totalCount)
-      setRevisitData(totalLead.totalRevisit)
-      setTotalRevisitCount(totalLead.totalRevisit.length)
       console.log("lead count =",totalLead);
     }
       catch(error){
@@ -340,12 +315,10 @@ const CounsellorVisitAdd = () => {
 
     console.log("register value =", tempInpVal);
 
-    console.log("revist data =",visitData)
-
 
     try {
 
-      let url = `http://localhost:8000/counselorVisit`
+      let url = `http://localhost:8000/counselorFollowUp`
       ContextValue.updateProgress(60);
 
       const res = await fetch(`${url}`, {
@@ -384,69 +357,6 @@ const CounsellorVisitAdd = () => {
 
   };
 
-  // update visit
-
-
- const updateVisit = async (e) => {
-
-    ContextValue.updateProgress(30);
-    ContextValue.updateBarStatus(true);
-
-    e.preventDefault();
-    // let tempInpVal = inpval;
-    // console.log("lead date is  =",tempInpVal.date)
-    // let dateArray = tempInpVal.date.split("-");
-    // console.log("registration array =", dateArray);
-    // tempInpVal.date = dateConvert(tempInpVal.date);
-    // tempInpVal.month = dateArray[1];
-    // tempInpVal.year = dateArray[0];
-    // tempInpVal.Day = dateArray[2];
-
-    // tempInpVal.date = `${tempInpVal.year}-${tempInpVal.month}-${tempInpVal.Day}`
-
-    // console.log("register value =", tempInpVal);
-
-
-    try {
-
-      let url = `http://localhost:8000/counselorVisit`
-      ContextValue.updateProgress(60);
-
-      const res = await fetch(`${url}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "auth-token": localStorage.getItem("counsellor")
-        },
-        body: JSON.stringify(RevisitData),
-      });
-
-      // ContextValue.updateProgress(60);
-
-      // const data = await res.json();
-
-      console.log("progress bar 100")
-
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      SuccessMsg("Visit");
-
-
-    } 
-    catch(error) {
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Something went wrong!",
-      });
-
-      console.log("error =", error.message);
-    }
-    
-
-  };
   // success message function
 
   const SuccessMsg=()=>{
@@ -556,34 +466,23 @@ const CounsellorVisitAdd = () => {
     }
   };
 
-  const setVisitStatus =(name, value, index,from)=>{
+  const setVisitStatus =(name, value, index)=>{
     console.log("inside visit status", value)
-    if(from=="from today visit"){
     let tempvisitData = visitData;
     tempvisitData[index].visitStatus  = value;
-    tempvisitData[index].visitDate  = "";
-    setVisitData(tempvisitData)
-    }
-    else{
-      let tempRevisitData = RevisitData;
-      tempRevisitData[index].visitStatus  = value;
-      tempRevisitData[index].visitDate  = "";
-      setRevisitData(tempRevisitData)
-    }
 
-    
-    
+    setVisitData(tempvisitData)
 
     if(value=="Re Visit")
     {
       console.log("inside if condition",value)
-      getReVisitDate(index, from)
+      getReVisitDate(index)
       
     }
       else if(value=="Done"){
       console.log("inside else if condition",value)
 
-        getDoneStatus(index, from)
+        getDoneStatus(index)
       }
   }
 
@@ -603,8 +502,8 @@ const CounsellorVisitAdd = () => {
 
               <div className="col-sm-6 p-md-0">
                 <div className="welcome-text">
-                  <h4>Add Visit</h4>
-                  <h4>Total Visit: {(btnStatus=="Today-Visit" || btnStatus=="add-visit") ? visitTotalCount:revisitCount}</h4>
+                  <h4>Add Follow Up</h4>
+                  <h4>Total Follow Up: {visitTotalCount}</h4>
                 </div>
               </div>
 
@@ -636,14 +535,7 @@ const CounsellorVisitAdd = () => {
               
               
             </div>
-
-            <div className="btn-group d-flex">
-<button className="btn btn-primary"  onClick={()=>setBtnStatus("Today-Visit")}>Added Visit</button>
-<button className="btn btn-primary" onClick={()=>setBtnStatus("revisit")}>Revisit</button>
-<button className="btn btn-primary" onClick={()=>setBtnStatus("add-visit")}>Add Visit</button>
-</div>
-
-           {btnStatus=="add-visit" && <div className="row">
+            <div className="row">
               <div className="col-xl-12 col-xxl-12 col-sm-12">
                 <div className="card">
                   <div className="card-header">
@@ -697,10 +589,10 @@ const CounsellorVisitAdd = () => {
                         <div className="col-lg-6 col-md-6 col-sm-12">
                           <div className="form-group">
                             <label className="form-label">
-                             Visit Date
+                             Remark
                             </label>
                             <input
-                              type="date"
+                              type="text"
                               onChange={(e) => {
                                 setINP({
                                   ...inpval,
@@ -708,7 +600,7 @@ const CounsellorVisitAdd = () => {
                                 });
                                 
                               }}
-                              name="visitDate"
+                              name="remark"
                               class="form-control"
                               id="exampleInputEmail1"
                               aria-describedby="emailHelp"
@@ -840,7 +732,7 @@ const CounsellorVisitAdd = () => {
                             disabled={ContextValue.barStatus}
                             // disabled={allFieldStatus===false?true:false}
                           >
-                            Add Visit
+                            Add Follow Up
                           </button>
                         
                         </div>
@@ -851,19 +743,20 @@ const CounsellorVisitAdd = () => {
 
 
 
-            </div>}
+            </div>
           </div>
 
           
 
         </div>
 
-       {(btnStatus=="Today-Visit" || btnStatus=="add-visit") && <div className="content-body">
+       {visitData.length>0 && <div className="content-body">
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
           <th>Course</th>
           <th>Name</th>
-          <th>Visit Date</th>
+          <th>Date</th>
+          <th>Remark</th>
           <th>Status</th>
           <th>Delete</th>
           </tr>
@@ -873,21 +766,22 @@ const CounsellorVisitAdd = () => {
          <td> {element.Course} </td>
          <td> {element.name} </td>
          <td> {element.date} </td>
+         <td> {element.remark} </td>
          <select
                         id="exampleInputPassword1"
                         type="select"
-                        name="leadfrom"
+                        name="status"
                         class="custom-select mr-sm-2"
-                        defaultValue={element.visitStatus}
-                        onChange={(e)=>setVisitStatus(e.target.name, e.target.value, index, "from today visit")}
+                        defaultValue={element.status}
+                        onChange={(e)=>setINP({...inpval, [e.target.name]:e.target.value})}
                       
                     >
-                        <option disabled>--Select Visit Status--</option>
+                        <option disabled>--Select Follow Up Status--</option>
                     
-                                <option value="Done" >Done</option>
-                                <option value="Not Joined" >Not Joined</option>                       
-                                <option value="Re Visit" >Re Visit</option>                      
-                                <option value="Scheduled" >Scheduled</option>                      
+                                <option value="Registered" >Registered</option>
+                                <option value="Added" >Added</option>
+                                <option value="Not Interested" >Not Interested</option>                                            
+                                <option value="Re Follow Up" >Re Follow Up</option>                                            
                         
                     </select>
          <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.name, element.mobile)}}> X </td>
@@ -903,57 +797,7 @@ const CounsellorVisitAdd = () => {
                             className="btn btn-primary"            
                             // disabled={allFieldStatus===false?true:false}
                           >
-                            Submit Visit
-                          </button>
-      </div>
-        </div>}
-
-
-        {(btnStatus=="revisit") && <div className="content-body">
-        <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-            <tr>
-          <th>Course</th>
-          <th>Name</th>
-          <th>Visit Date</th>
-          <th>Status</th>
-          </tr>
-      {RevisitData.map((element,index)=>{
-        return(
-          <tr>
-         <td> {element.Course} </td>
-         <td> {element.name} </td>
-         <td> {element.visitDate} </td>
-         <select
-                        id="exampleInputPassword1"
-                        type="select"
-                        name="leadfrom"
-                        class="custom-select mr-sm-2"
-                        defaultValue={element.visitStatus}
-                        onChange={(e)=>setVisitStatus(e.target.name, e.target.value, index, "from revisit")}
-                      
-                    >
-                        <option disabled>--Select Visit Status--</option>
-                    
-                                <option value="Done" >Done</option>
-                                <option value="Not Joined" >Not Joined</option>                       
-                                <option value="Re Visit" >Re Visit</option>                      
-                                <option value="Scheduled" >Scheduled</option>                      
-                        
-                    </select>
-
-         </tr>
-        )
-      })}
-      </table>
-
-      <div className="d-flex">
-      <button
-                            type="submit"
-                            onClick={updateVisit}
-                            className="btn btn-primary"            
-                            // disabled={allFieldStatus===false?true:false}
-                          >
-                            Update Visit
+                            Submit Follow Up
                           </button>
       </div>
         </div>}
@@ -962,4 +806,4 @@ const CounsellorVisitAdd = () => {
   );
 };
 
-export default CounsellorVisitAdd;
+export default CounsellorFollowUpAdd;

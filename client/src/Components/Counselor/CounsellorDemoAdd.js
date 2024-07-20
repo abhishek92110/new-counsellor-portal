@@ -76,7 +76,7 @@ const CounsellorDemoAdd = () => {
             Course: "",
     Count:"",
     Day: "",
-    date: "",
+    date: inpval.date,
     Course: "",
     subCourse: "",
     Counselor: "",
@@ -120,10 +120,10 @@ const CounsellorDemoAdd = () => {
       // setINP({...inpval, ["demoStudent"]:totalLead.totalLead})
       // setINP({...inpval, ["totalCount"]:totalLead.totalCount})
 
-      setReScheduleStudent(totalLead.totalLead[0].demoStudent)
+      setReScheduleStudent(totalLead.totalLead)
 
       // setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
-      console.log("reschedule data =",totalLead.totalLead, totalLead.totalLead[0].demoStudent);
+      console.log("reschedule data =",totalLead.totalLead);
       setBtnStatus("today-added-demo")
     }
       catch(error){
@@ -220,6 +220,9 @@ const CounsellorDemoAdd = () => {
         data.reschedule = inpval.date
         data.scheduleDate = inpval.date
         prevnameMobile = true;
+        data.Day = inpval.Day
+        data.month = inpval.month
+        data.year = inpval.year
       }
     })
 
@@ -232,7 +235,11 @@ const CounsellorDemoAdd = () => {
       trainer:inpval.trainer,
       status:"Schedule",
       reschedule:inpval.date,
-      scheduleDate:inpval.date
+      scheduleDate:inpval.date,
+      Day : inpval.Day,
+      month : inpval.month,
+      year : inpval.year
+      
 
     }
 
@@ -366,6 +373,12 @@ catch(error){
       });
 
   }
+}
+
+else{
+  ContextValue.updateProgress(100);
+  ContextValue.updateBarStatus(false);
+  SuccessMsg("Demo");
 }
     }
     }

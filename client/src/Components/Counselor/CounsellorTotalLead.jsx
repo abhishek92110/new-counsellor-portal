@@ -6,7 +6,7 @@ import Header from "../Header";
 import Swal from "sweetalert2";
 import { HashLoader } from "react-spinners";
 
-const CounsellorLeadAdd = () => {
+const CounsellorTotalLead = () => {
   let navigate = useNavigate();
 
   const [allcourse, setAllCourse] = useState();
@@ -17,6 +17,17 @@ const CounsellorLeadAdd = () => {
   const [counselor, setCounselor] = useState();
   const [leadStatus, setLeadStatus] = useState("Lead")
   const [currentCourseCount, setCurrentCourseCount] = useState([])
+  const [demoData, setDemoData] = useState({
+    date:"",
+    demoStudent:[],
+    month:"",
+    day:"",
+    year:"",
+  })
+  const [visitData, setVisitData] = useState([])
+  const [followUpData, setFollowUpData] = useState([])
+  const [currentDate, setCurrentDate]  = useState([])
+
   // const location = useLocation();
   // const { counselor } = location.state;
 
@@ -47,12 +58,6 @@ const CounsellorLeadAdd = () => {
     console.log("counselor all =", counsellor.counselorData);
   };
 
-  // const getAllCourse = async () => {
-  //   let allCourse = await ContextValue.getAllBatchCourse();
-  //   console.log("course =", allCourse.batchCourse[0].Course);
-  //   setAllCourse(allCourse.batchCourse[0].Course);
-  // };
-
   const getAllCourse = async () => {
     let allCourse = await ContextValue.getAllMainSubCourse();
     console.log("course =", allCourse, allCourse.courses);
@@ -74,7 +79,14 @@ const CounsellorLeadAdd = () => {
     totalCount:0,
     Leadby:[],
     leadfrom:"",
+    sttaus:"",
   });
+
+  const [leadData, setLeadData] = useState({
+    date:"",
+    counselorNo:"",
+    student:[]
+  })
 
   function isAllFieldsFilled() {
     for (const key in inpval) {
@@ -203,7 +215,7 @@ const CounsellorLeadAdd = () => {
     // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
-      let totalLead = await fetch('http://localhost:8000/getcounselorLeadCount',{
+      let totalLead = await fetch('http://localhost:8000/readSheetData',{
         method:'GET',
         headers:{
           "counselorNo":localStorage.getItem("counsellorNo"),
@@ -216,10 +228,12 @@ const CounsellorLeadAdd = () => {
   
       totalLead = await totalLead.json();
       console.log("lead count =",totalLead);
-      if(totalLead.totalLead.length>0)
+      if(totalLead.filteredRows.length>0)
       {
 
-        setINP(totalLead.totalLead[0])
+        setINP(totalLead.filteredRows)
+        setLeadData({...leadData,["date"]:currentDate, ["student"]:totalLead.filteredRows})
+        
 
       }
       // setINP({...inpval,["totalCount"]:totalLead.totalCount})
@@ -251,18 +265,21 @@ const CounsellorLeadAdd = () => {
     ContextValue.updateBarStatus(true);
 
     e.preventDefault();
-    let tempInpVal = inpval;
-    console.log("lead date is  =",tempInpVal.date)
-    let dateArray = tempInpVal.date.split("-");
-    console.log("registration array =", dateArray);
-    tempInpVal.date = dateConvert(tempInpVal.date);
-    tempInpVal.month = dateArray[1];
-    tempInpVal.year = dateArray[0];
-    tempInpVal.Day = dateArray[2];
+    // let tempInpVal = inpval;
+    // console.log("lead date is  =",tempInpVal.date)
+    // let dateArray = tempInpVal.date.split("-");
+    // console.log("registration array =", dateArray);
+    // tempInpVal.date = dateConvert(tempInpVal.date);
+    // tempInpVal.month = dateArray[1];
+    // tempInpVal.year = dateArray[0];
+    // tempInpVal.Day = dateArray[2];
 
-    tempInpVal.date = `${tempInpVal.year}-${tempInpVal.month}-${tempInpVal.Day}`
+    // tempInpVal.date = `${tempInpVal.year}-${tempInpVal.month}-${tempInpVal.Day}`
 
-    console.log("register value =", tempInpVal);
+    // console.log("register value =", tempInpVal);
+
+    let tempLeadData = leadData;
+    tempLeadData.student  = inpval
 
 
     try {
@@ -276,22 +293,185 @@ const CounsellorLeadAdd = () => {
           "Content-Type": "application/json",
           "auth-token": localStorage.getItem("counsellor")
         },
-        body: JSON.stringify(tempInpVal),
+        body: JSON.stringify(tempLeadData),
       });
 
       // ContextValue.updateProgress(60);
 
-      // const data = await res.json();
+      const data = await res.json();
 
-      console.log("progress bar 100")
+      if(data.status){
 
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      SuccessMsg(leadStatus);
+        try {
 
+          let url = `http://localhost:8000/counselorDemo`
+          ContextValue.updateProgress(60);
+    
+          const res = await fetch(`${url}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "auth-token": localStorage.getItem("counsellor")
+            },
+            body: JSON.stringify(demoData),
+          });
+    
+          ContextValue.updateProgress(60);
+    
+          const data = await res.json();
+    
+          if(data.status && (visitData.length>0 || followUpData>0)){
+            try {
+    
+              let url = `http://localhost:8000/counselorVisit`
+              ContextValue.updateProgress(60);
+        
+              const res = await fetch(`${url}`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "auth-token": localStorage.getItem("counsellor")
+                },
+                body: JSON.stringify(visitData),
+              });
+        
+              ContextValue.updateProgress(60);
+        
+              const data = await res.json();
+        
+              console.log("progress bar 100")
+    
+              if(data.status && followUpData.length>0){
+                try {
+    
+                  let url = `http://localhost:8000/counselorFollowUp`
+                  ContextValue.updateProgress(60);
+            
+                  const res = await fetch(`${url}`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "auth-token": localStorage.getItem("counsellor")
+                    },
+                    body: JSON.stringify(followUpData),
+                  });
+            
+                  // ContextValue.updateProgress(60);
+            
+                  const data = await res.json();
+            
+                  console.log("progress bar 100")
+    
+                  if(data.status){
+                    ContextValue.updateProgress(100);
+                    ContextValue.updateBarStatus(false);
+                    SuccessMsg("Visit");
+                  }
+    
+                  else{
+                    ContextValue.updateProgress(100);
+                    ContextValue.updateBarStatus(false);
+                    Swal.fire({
+                      icon: "error",
+                      title: "Oops...",
+                      text: "Something went wrong!",
+                    });
+              
+                  }
+            
+                 
+            
+            
+                } 
+                catch(error) {
+                  ContextValue.updateProgress(100);
+                  ContextValue.updateBarStatus(false);
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Something went wrong!",
+                  });
+            
+                  console.log("error =", error.message);
+                }
+              }
+    
+              else if(data.status && followUpData.length<=0){
+                ContextValue.updateProgress(100);
+                ContextValue.updateBarStatus(false);
+                SuccessMsg("Visit");
+              }
+    
+              else if(data.status == false){
+                ContextValue.updateProgress(100);
+              ContextValue.updateBarStatus(false);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+              });
+              }
+        
+           
+        
+        
+            } 
+            catch(error) {
+              ContextValue.updateProgress(100);
+              ContextValue.updateBarStatus(false);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+              });
+        
+              console.log("error =", error.message);
+            }
+          }
+    
+          else if(data.status){
+            ContextValue.updateProgress(100);
+            ContextValue.updateBarStatus(true);
+          }
+    
+          else if(data.status==false){
+            ContextValue.updateProgress(100);
+            ContextValue.updateBarStatus(false);
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Something went wrong!",
+            });
+          } 
+    
+          console.log("progress bar 100", data)
+        }
+        catch(error) {
+          ContextValue.updateProgress(100);
+          ContextValue.updateBarStatus(false);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+    
+          console.log("error =", error.message);
+        }
+
+      }
+
+      else{
+        ContextValue.updateProgress(100);
+          ContextValue.updateBarStatus(false);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+      }
 
     } 
-    catch(error) {
+    catch(error){
       ContextValue.updateProgress(100);
       ContextValue.updateBarStatus(false);
       Swal.fire({
@@ -299,9 +479,10 @@ const CounsellorLeadAdd = () => {
         title: "Oops...",
         text: "Something went wrong!",
       });
-
-      console.log("error =", error.message);
     }
+
+   
+  
     
 
   };
@@ -333,15 +514,6 @@ const CounsellorLeadAdd = () => {
     return formattedDate;
   };
 
-  const EmptyFilled = () => {
-    let tempInpVal = inpval;
-
-    for (let key in inpval) {
-      tempInpVal[key] = "";
-    }
-
-    setINP(tempInpVal);
-  };
 
   let trainerData = {};
 
@@ -421,7 +593,7 @@ const CounsellorLeadAdd = () => {
 
     let courseCount =[];
 
-    console.log("inpval =",inpval,inpval.Leadby.length)
+    // console.log("inpval =",inpval,inpval.Leadby.length)
     
     if(inpval.Leadby.length>0){
 
@@ -522,10 +694,250 @@ const CounsellorLeadAdd = () => {
     });
   };
 
+
+  function formatDateString(dateString) {
+    // Create a Date object from the ISO 8601 string
+    const date = new Date(dateString);
+
+    // Get the day, month, and year
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+
+    // Format the date as DD/MM/YYYY
+    return `${day}/${month}/${year}`;
+}
+
+// add status function
+
+const addStatus  =(value,element,index)=>{
+
+  if(inpval[index].status=="")
+  {
+
+  if(value=="Demo"){
+    addDemo(element,index, value)
+  }
+  else if(value=="Visit"){
+    addVisit(element, index, value)
+  }
+  else if(value=="Follow Up"){
+    addFollowUp(element, index, value)
+  }
+}
+
+else if(inpval[index].status!=value){
+  if(inpval[index].status=="Demo"){
+    let tempDemoData = demoData;
+    let tempDemoStudent = tempDemoData.demoStudent.filter(data=>{
+        return (!(data.name==element.name && data.mobile==element.mobile))
+    })
+
+    tempDemoData.demoStudent  = tempDemoStudent;
+    setDemoData(tempDemoData)
+  }
+  else if(inpval[index].status=="Visit"){
+    let tempVisitData = visitData.filter(data=>{
+        return (!(data.name==element.name && data.mobile==element.mobile))
+    })
+
+    setVisitData(tempVisitData)
+  }
+  else if(inpval[index].status=="Follow Up"){
+    let tempFollowUpData = followUpData.filter(data=>{
+        return (!(data.name==element.name && data.mobile==element.mobile))
+    })
+
+    setFollowUpData(tempFollowUpData)
+  }
+
+  if(value=="Demo"){
+    addDemo(element,index, value)
+  }
+  else if(value=="Visit"){
+    addVisit(element, index, value)
+  }
+  else if(value=="Follow Up"){
+    addFollowUp(element, index, value)
+  }
+}
+
+}
+
+// add demo function
+
+const addDemo = (element, index, value)=>{
+
+  console.log(' index of student =',index)
+  Swal.fire({
+      title: 'Add Reschedule Date',
+      html:
+          `<input id="demoDate" type="date" class="swal2-input" placeholder="Add Date">
+          <input id="trainer" type="text" class="swal2-input" placeholder="Add Trainer">`,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        const demoDate = document.getElementById('demoDate').value;
+        const trainer = document.getElementById('trainer').value;
+        
+
+        let tempDemoData = demoData;
+
+        tempDemoData.date = currentDate;
+
+        let obj = {
+          name:element.name,
+          course:element.course,
+          mobile:element.mobile,
+          trainer:trainer,
+          status:"Schedule",
+          reschedule:demoDate,
+          scheduleDate:currentDate
+        }
+
+        tempDemoData.demoStudent.push(obj)
+        setDemoData(tempDemoData)
+
+        let tempInpVal = inpval;
+        tempInpVal[index].status=value
+        setINP(tempInpVal)
+
+        console.log("temp demo student =",tempDemoData)
+
+        Swal.fire({
+          title: `${result.value}`,
+          
+          imageUrl: result.value.avatar_url
+        })
+      }
+    })
+}
+
+// add visit function
+
+const addVisit = (element, index, value)=>{
+
+  console.log(' index of student =',index)
+  Swal.fire({
+      title: 'Add Visit Date',
+      html:
+          `<input id="visitDate" type="date" class="swal2-input" placeholder="Add Date">`,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        const visitDate = document.getElementById('visitDate').value;
+
+        console.log("date =",currentDate, inpval)
+        
+        let tempVisitData = visitData;
+
+        let obj = {
+          date:currentDate,
+          name:element.name,
+          course:element.course,
+          mobile:element.mobile,
+          visitTrainer:"",
+          visitCounsellor:"",
+          visitDate:visitDate,
+          visitStatus:"Schedule",
+        }
+
+        tempVisitData.push(obj)
+        setVisitData(tempVisitData)
+
+        let tempInpVal = inpval;
+        tempInpVal[index].status=value
+        setINP(tempInpVal)
+
+
+        console.log("tempVisitData =",tempVisitData)
+
+        Swal.fire({
+          title: `${result.value}`,
+          
+          imageUrl: result.value.avatar_url
+        })
+      }
+    })
+
+}
+
+// add follow up function
+
+const addFollowUp = (element, index, value)=>{
+
+  console.log(' index of student =',index)
+  Swal.fire({
+      title: 'Add Reschedule Date',
+      html:
+          `<input id="followUpDate" type="date" class="swal2-input" placeholder="Add Follow Up Date">
+          <input id="remark" type="text" class="swal2-input" placeholder="Add Remark">`,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        const followUpDate = document.getElementById('followUpDate').value;
+        const remark = document.getElementById('remark').value;
+        
+
+        let tempFollowUpData = followUpData;
+      
+        let obj = {
+          name:element.name,
+          course:element.course,
+          mobile:element.mobile,
+          status:"Schedule",
+          FollowUp:[{
+            date:followUpDate,
+            remark:remark
+          }],
+          lastFollowUpDate:followUpDate,
+          status:"Schedule"
+        }
+
+        tempFollowUpData.push(obj)
+        setFollowUpData(tempFollowUpData)
+
+        let tempInpVal = inpval;
+        tempInpVal[index].status=value
+        setINP(tempInpVal)
+
+
+        console.log("temp demo student =",tempFollowUpData)
+
+        Swal.fire({
+          title: `${result.value}`,
+          
+          imageUrl: result.value.avatar_url
+        })
+      }
+    })
+}
+
   return (
     <>
       <Header />
-      <div className="sidebar-main-container">
+      <div className="sidebar-main-container flex-col">
         <HashLoader color="#3c84b1" />
         {/* <Cslidebar /> */}
         {/* <div className='pos-center'>
@@ -538,8 +950,7 @@ const CounsellorLeadAdd = () => {
 
               <div className="col-sm-6 p-md-0">
                 <div className="welcome-text">
-                  <h4>Add Lead</h4>
-                  <h4>Total Lead: {inpval.totalCount}</h4>
+                  <h4>Total Lead: {inpval.length}</h4>
                 </div>
               </div>
 
@@ -555,7 +966,7 @@ const CounsellorLeadAdd = () => {
                                   ...inpval,
                                   [e.target.name]: e.target.value,
                                 });
-                                
+                                setCurrentDate(e.target.value)
                               }}
                               name="date"
                               class="form-control"
@@ -567,105 +978,46 @@ const CounsellorLeadAdd = () => {
                         </div>
               
             </div>
-            <div className="row">
-              <div className="col-xl-12 col-xxl-12 col-sm-12">
-                <div className="card">
-                  <div className="card-header">
-                    <h5 className="card-title">Basic Info</h5>
-                  </div>
-                  <div>
-                    <form action="#" method="post">
-                      <div className="row">
-                        
-                       
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                        <label className="form-label">
-                              Lead By
-                            </label>
-                        <select
-                        id="exampleInputPassword1"
-                        type="select"
-                        name="leadfrom"
-                        class="custom-select mr-sm-2"
-                        onChange={(e)=>{setINP({...inpval, ["leadfrom"]:e.target.value});updateCurrentArr(e.target.value)}}
-                      
-                    >
-                        <option disabled selected>--select Lead By--</option>
-                    
-                                <option value="WhatsApp">WhatsApp</option>
-                                <option value="Social Media" >Social Media</option>
-                                <option value="Inbound" >Inbound</option>                       
-                                <option value="Website" >Website</option>                       
-                                <option value="Others" >Others</option>                       
-                        
-                    </select>
-                        </div>
-
-                       
-
-                      </div>
-
-
-                        <div className="d-flex jc-space-between">
-                          <span>Course</span>
-                          <span>Count</span>
-                        </div>
-                        {currentCourseCount.map((data,index)=>{
-                          return(
-                            <div className="d-flex mb-5">
-                             <div className="d-flex">
-                              <input type="checkbox" className="checkboxClass" checked={data.checked} onChange={(e)=>{setCurrentCourseCountFunc(index,e.target.value,"checkbox")}}></input>
-                              <p className="course-text">{data.course}</p>
-                             </div>
-
-                             <div>
-                             <input type="number" className="count-input" value={data.count} onChange={(e)=>{setCurrentCourseCountFunc(index,e.target.value, "input")}}></input>
-                             </div>
-                            </div>
-                          )
-                        })}
-
-                      <div className="col-lg-12 col-md-12 col-sm-12">
-                          <button
-                            type="submit"
-                            onClick={addinpdata}
-                            className="btn btn-primary"
-                            disabled={ContextValue.barStatus}
-                            // disabled={allFieldStatus===false?true:false}
-                          >
-                            Add Lead
-                          </button>
-                         
-                        </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-
-
-
-            </div>
+          
           </div>
 
           
 
         </div>
 
-       {(inpval.Leadby).length>0 && <div className="content-body">
+       {inpval.length>0 && <div className="content-body">
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
           <th>Course</th>
-          <th>Count</th>
-          <th>Lead By</th>
-          <th>Delete</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Date</th>
+          <th>Status</th>
           </tr>
-      {inpval.Leadby.map((element,index)=>{
+      {inpval.map((element,index)=>{
         return(
           <tr>
          <td> {element.course} </td>
-         <td> {element.count} </td>
-         <td> {element.lead} </td>
-         <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.course, element.lead)}}> X </td>
+         <td> {element.name} </td>
+         <td> {element.mobile} </td>
+         <td> {formatDateString(element.date)} </td>
+         <select
+                        id="exampleInputPassword1"
+                        type="select"
+                        name="leadfrom"
+                        class="custom-select mr-sm-2"
+                        onChange={(e)=>{
+                          addStatus(e.target.value,element,index)
+                        }}
+                      
+                    >
+                        <option disabled selected >--select Status--</option>
+                    
+                                <option value="Demo">Demo</option>
+                                <option value="Visit" >Visit</option>
+                                <option value="Follow Up" >Follow Up</option>                     
+                        
+                    </select>
          </tr>
         )
       })}
@@ -687,4 +1039,4 @@ const CounsellorLeadAdd = () => {
   );
 };
 
-export default CounsellorLeadAdd;
+export default CounsellorTotalLead;

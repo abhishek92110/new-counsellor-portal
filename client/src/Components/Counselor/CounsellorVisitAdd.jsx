@@ -294,6 +294,9 @@ const CounsellorVisitAdd = () => {
 
   const getVisitData = async()=>{
 
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
+
     // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
@@ -305,6 +308,8 @@ const CounsellorVisitAdd = () => {
           "endDate":inpval.date
         }
       })
+
+      ContextValue.updateProgress(60);
   
       totalLead = await totalLead.json();
       setVisitData(totalLead.totalLead)
@@ -312,9 +317,20 @@ const CounsellorVisitAdd = () => {
       setRevisitData(totalLead.totalRevisit)
       setTotalRevisitCount(totalLead.totalRevisit.length)
       console.log("lead count =",totalLead);
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg();
     }
       catch(error){
 
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
   }
@@ -357,7 +373,7 @@ const CounsellorVisitAdd = () => {
         body: JSON.stringify(visitData),
       });
 
-      // ContextValue.updateProgress(60);
+      ContextValue.updateProgress(60);
 
       // const data = await res.json();
 
@@ -421,7 +437,7 @@ const CounsellorVisitAdd = () => {
         body: JSON.stringify(RevisitData),
       });
 
-      // ContextValue.updateProgress(60);
+      ContextValue.updateProgress(60);
 
       // const data = await res.json();
 
@@ -454,7 +470,7 @@ const CounsellorVisitAdd = () => {
     Swal.fire({
       position: 'center',
       icon: 'success',
-      title: `Visit has beed added`,
+      title: ``,
       showConfirmButton: false,
       timer: 1500
     })

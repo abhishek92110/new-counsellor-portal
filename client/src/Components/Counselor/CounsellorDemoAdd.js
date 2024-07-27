@@ -47,6 +47,9 @@ const CounsellorDemoAdd = () => {
   };
 
   const getDemo = async()=>{
+
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
     console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"))
 
     try{
@@ -59,6 +62,7 @@ const CounsellorDemoAdd = () => {
         }
       })
   
+      ContextValue.updateProgress(60);
       totalLead = await totalLead.json();
 
       // setINP({...inpval, ["demoStudent"]:totalLead.totalLead})
@@ -95,8 +99,21 @@ const CounsellorDemoAdd = () => {
 
         console.log("inside else")
       }
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg();
     }
       catch(error){
+
+        
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
 
         console.log("error message =",error.message)
 
@@ -105,6 +122,10 @@ const CounsellorDemoAdd = () => {
 
 
   const getReSchedule  =async()=>{
+
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
+
     try{
       let totalLead = await fetch('http://localhost:8000/getcounselorDemoReschedule',{
         method:'GET',
@@ -115,6 +136,7 @@ const CounsellorDemoAdd = () => {
         }
       })
   
+      ContextValue.updateProgress(60);
       totalLead = await totalLead.json();
 
       // setINP({...inpval, ["demoStudent"]:totalLead.totalLead})
@@ -125,9 +147,19 @@ const CounsellorDemoAdd = () => {
       // setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
       console.log("reschedule data =",totalLead.totalLead);
       setBtnStatus("today-added-demo")
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg();
     }
       catch(error){
 
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
   }
 
@@ -259,6 +291,9 @@ const CounsellorDemoAdd = () => {
 
   const updateReschedule = async()=>{
 
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
+
     try{
 
       const res = await fetch(`http://localhost:8000/counselorUpdateDemoReschedule`, {
@@ -330,7 +365,7 @@ catch(error){
         body: JSON.stringify(tempInpVal),
       });
 
-      // ContextValue.updateProgress(60);
+      ContextValue.updateProgress(60);
 
       // const data = await res.json();
 
@@ -404,7 +439,7 @@ else{
     Swal.fire({
       position: 'center',
       icon: 'success',
-      title: `Demo has beed added`,
+      title: ``,
       showConfirmButton: false,
       timer: 1500
     })
@@ -655,168 +690,15 @@ else{
 <div className="btn-group d-flex">
 <button className="btn btn-primary"  onClick={()=>setBtnStatus("today-added-demo")}>Today Added Demo</button>
 <button className="btn btn-primary" onClick={()=>setBtnStatus("reschedule-demo")}>Reschedule Demo</button>
-<button className="btn btn-primary" onClick={()=>setBtnStatus("add-demo")}>Add Demo</button>
 </div>
 
-
-           {btnStatus==="add-demo" && <div className="row">
-              <div className="col-xl-12 col-xxl-12 col-sm-12">
-                <div className="card">
-                  <div className="card-header">
-                    <h5 className="card-title">Basic Info</h5>
-                  </div>
-                  <div>
-                    <form action="#" method="post">
-                      <div className="row">
-                        
-                        
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                          <div className="form-group">
-                            <label className="form-label">Name</label>
-                            <input
-                              type="text"
-                              max="10"
-                              value={inpval.name}
-                              onChange={(e) => {
-                                setINP({
-                                  ...inpval,
-                                  [e.target.name]: e.target.value,
-                                });
-                                
-                              }}
-                              name="name"
-                              class="form-control"
-                              id="exampleInputPassword1"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                          <div className="form-group">
-                            <label className="form-label">Mobile</label>
-                            <input
-                              type="text"
-                              max="10"
-                              value={inpval.mobile}
-                              onChange={(e) => {
-                                setINP({
-                                  ...inpval,
-                                  [e.target.name]: e.target.value,
-                                });
-                                
-                              }}
-                              name="mobile"
-                              class="form-control"
-                              id="exampleInputPassword1"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                          <div className="form-group">
-                            <label className="form-label">Trainer Name</label>
-                            <input
-                              type="text"
-                              max="10"
-                              value={inpval.trainer}
-                              onChange={(e) => {
-                                setINP({
-                                  ...inpval,
-                                  [e.target.name]: e.target.value,
-                                });
-                                
-                              }}
-                              name="trainer"
-                              class="form-control"
-                              id="exampleInputPassword1"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                          <div className="form-group">
-                            <label className="form-label">Course Name</label>
-                            {allcourse && (
-                              <select
-                                id="exampleInputPassword1"
-                                type="select"
-                                name="Course"
-                                class="form-control"
-                                onChange={(e) => setMainCourse(e.target.value)}
-                              >
-                                <option disabled selected>
-                                  --select Course Name--
-                                </option>
-                                {allcourse.map((data) => {
-                                  return <option value={data.course}>{data.course}</option>;
-                                })}
-                              </select>
-                            )}
-                          </div>
-                        </div>
-                       
-
-                        {inpval.status=="ReScheduled" && 
-                         <div className="col-lg-6 col-md-6 col-sm-12">
-                         <div className="form-group">
-                           <label className="form-label">
-                             Reschedule Date
-                           </label>
-                           <input
-                             type="date"
-                             onChange={(e) => {
-                               setINP({
-                                 ...inpval,
-                                 [e.target.name]: e.target.value,
-                               });
-                               
-                             }}
-                             name="reSchedule"
-                             class="form-control"
-                             id="exampleInputEmail1"
-                             aria-describedby="emailHelp"
-                           />
-                         </div>
-                       </div>}
-
-                       
-
-                      </div>
-                      <div className="col-lg-12 col-md-12 col-sm-12 mt-4">
-                          <button
-                            type="submit"
-                            onClick={addinpdata}
-                            className="btn btn-primary"
-                            disabled={ContextValue.barStatus}
-                            // disabled={allFieldStatus===false?true:false}
-                          >
-                            Add Demo
-                          </button>
-                          <button
-                            type="submit"
-                            onClick={addinpdataMail}
-                            className="btn btn-primary"            
-                            // disabled={allFieldStatus===false?true:false}
-                          >
-                            Submit Demo
-                          </button>
-                          <button type="submit" className="btn btn-light">
-                            Cancel
-                          </button>
-                        </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-
-
-
-            </div>}
           </div>
 
           
 
         </div>
 
-       {(btnStatus=="today-added-demo" || btnStatus=="add-demo") && <div className="content-body">
+       {(btnStatus=="today-added-demo") && <div className="content-body">
         <h3 className="p-30">Today Added Demo</h3>
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
@@ -844,10 +726,10 @@ else{
                     >
                         <option disabled>--select Demo Status--</option>
                     
-                                <option value="Done" >Done</option>
-                                <option value="Not Joined" >Not Joined</option>                       
-                                <option value="ReScheduled" >ReScheduled</option>                      
-                                <option value="Schedule" >Schedule</option>                      
+                                <option value="Done">Done</option>
+                                <option value="Not Joined">Not Joined</option>                       
+                                <option value="ReScheduled">ReScheduled</option>                      
+                                <option value="Schedule">Schedule</option>                      
                         
                     </select>
          </td>

@@ -179,8 +179,8 @@ export default function Home() {
     setStartEndate("today")
     getLead() 
     getDemo()
-    getVisit()
     getFollowUp()
+    getVisit()
     }
 
     else{
@@ -189,6 +189,9 @@ export default function Home() {
   }
 
   const getLead = async()=>{
+
+    ContextValue.updateProgress(20);
+    ContextValue.updateBarStatus(true);
 
     console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
@@ -208,7 +211,13 @@ export default function Home() {
       console.log("lead count =",totalLead);
     }
       catch(error){
-
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
   }
@@ -216,7 +225,7 @@ export default function Home() {
   // get counselor demo
 
   const getDemo = async()=>{
-
+    ContextValue.updateProgress(40);
     console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
@@ -247,7 +256,13 @@ export default function Home() {
       console.log("demo count  =",totalLead, totalReschedule);
     }
       catch(error){
-
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
   }
@@ -255,7 +270,7 @@ export default function Home() {
   // get counselor visit 
 
   const getVisit = async()=>{
-
+    ContextValue.updateProgress(80);
     console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
@@ -272,19 +287,43 @@ export default function Home() {
       setTotalVisit(totalLead.totalLead)
       setVisitCount(totalLead.totalLead.length)
       console.log("visit count =",totalLead);
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg();
     }
       catch(error){
-
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
   }
 
+  // success Msg
+
+  const SuccessMsg=()=>{
+
+    Swal.fire({
+      position: 'center',
+      icon: 'success',
+      title: ``,
+      showConfirmButton: false,
+      timer: 1500
+    })
+    
+  }
 
   // get counselor  follow up 
 
 
   const getFollowUp = async()=>{
 
+    ContextValue.updateProgress(60);
     console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
@@ -303,7 +342,13 @@ export default function Home() {
       console.log("follow up count =",totalLead);
     }
       catch(error){
-
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
   }
@@ -550,6 +595,8 @@ return (`${year}-${month}-${day}`)
 
 
   const getLeadData = ()=>{
+
+   
     getLead();
     getDemo();
     getFollowUp();
@@ -609,6 +656,24 @@ return (`${year}-${month}-${day}`)
 
                 <div className="col-xl-3 col-xxl-3 col-sm-6">
                   <div className="widget-stat card p-0 bg-secondary">
+                    <div className="card-body" onClick={()=>{navigate("Today-Lead");}}>
+                      <div className="media">
+                        <span className="mr-3">
+                        <i class="fa-solid fa-plus"/>
+                        </span>
+                        <div
+                          className="media-body text-white"
+                          
+                        >
+                          <p className="mb-1">Today Lead</p>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>  
+                <div className="col-xl-3 col-xxl-3 col-sm-6">
+                  <div className="widget-stat card p-0 bg-secondary">
                     <div className="card-body" onClick={()=>{navigate("Add-Counsellor-Lead");}}>
                       <div className="media">
                         <span className="mr-3">
@@ -624,7 +689,7 @@ return (`${year}-${month}-${day}`)
                       </div>
                     </div>
                   </div>
-                </div>  
+                </div> 
                 <div className="col-xl-3 col-xxl-3 col-sm-6">
                   <div className="widget-stat card p-0 bg-secondary">
                     <div className="card-body" onClick={()=>{navigate("Add-Counsellor-Demo");}}>

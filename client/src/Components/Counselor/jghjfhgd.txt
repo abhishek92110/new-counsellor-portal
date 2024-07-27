@@ -9,3 +9,21 @@ UC2023/POO/12-10
 $U,cbB%$
 
 counselor - 3
+
+
+   ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
+
+    ContextValue.updateProgress(60);
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg(leadStatus);
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });

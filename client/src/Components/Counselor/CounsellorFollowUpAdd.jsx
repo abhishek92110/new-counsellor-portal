@@ -16,6 +16,8 @@ const CounsellorFollowUpAdd = () => {
   const [allFieldStatus, setAllFieldStatus] = useState(false);
   const [counselor, setCounselor] = useState();
   const [visitTotalCount, setTotalVisitCount] = useState(0)
+  const [btnStatus, setBtnStatus] = useState("Today Follow Up")
+  const [reFollowUp, setReFollowUp]  = useState()
   // const location = useLocation();
   // const { counselor } = location.state;
 
@@ -119,8 +121,6 @@ const CounsellorFollowUpAdd = () => {
       remark: inpval.remark
     }
 
-    tempVisitData.FollowUp.push(obj)
-
     let prevnameMobile = false;
 
     tempVisitData.map(data=>{
@@ -132,29 +132,43 @@ const CounsellorFollowUpAdd = () => {
         data.name = inpval.name
         data.mobile = inpval.mobile
         data.status = inpval.status
+        data.lastFollowUpDate = ""
         data.remark = inpval.remark
-        data.FollowUp = {
+        data.FollowUp = [{
           date:inpval.date,
           remark:inpval.remark
-        };
+        }];
         prevnameMobile = true;
       }
     })
 
     if(!prevnameMobile){
 
-    tempVisitData.push(inpval);
+    tempVisitData.push(
+      {
+        Course:inpval.Course,
+        date  : inpval.date,
+        name : inpval.name,
+        mobile : inpval.mobile,
+        status : inpval.status,
+        remark : inpval.remark,
+        lastFollowUpDate : inpval.remark,
+        FollowUp : [{
+          date:inpval.date,
+          remark:inpval.remark
+        }]
+      }
+    );
   }
 
   let totalcount = tempVisitData.length;
   console.log("total visit data =",tempVisitData)
 
   setVisitData(tempVisitData)
-
   
     setTotalVisitCount(totalcount)
     // setINP({ ...inpval, ["course"]: tempCourseLead, ["totalCount"]:totalcount});
-    console.log("inpval data =",inpval)
+    console.log("tempVisitData =",tempVisitData)
     
 
   };
@@ -267,9 +281,58 @@ const CounsellorFollowUpAdd = () => {
       })
   }
 
+
+
+const showRefollowupDate = (index, from) => {
+  console.log(' index of student =', index, visitData[1]);
+
+  const runData = from === "from follow up" ? visitData : reFollowUp;
+  const followUpData = runData[index].FollowUp;
+
+  let tableHTML = '<table border="1" style="width: 100%; text-align: left;">';
+  tableHTML += '<tr><th>Date</th><th>Remark</th></tr>';
+
+  followUpData.forEach(data => {
+      tableHTML += `<tr><td>${data.date}</td><td>${data.remark}</td></tr>`;
+  });
+
+  tableHTML += '</table>';
+
+  Swal.fire({
+      title: 'Follow Up Date',
+      html: tableHTML,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading()
+  }).then((result) => {
+      if (result.isConfirmed) {
+          const reVisitDate = document.getElementById('reVisitDate').value;
+
+          let tempVisitData = visitData;
+          tempVisitData[index].visitDate = reVisitDate;
+
+          setVisitData(tempVisitData);
+
+          Swal.fire({
+              title: `Re Visit Date has been added`,
+              imageUrl: result.value.avatar_url
+          });
+      }
+  });
+};
+
+
+
   // function to get visit data
 
   const getVisitData = async()=>{
+
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
 
     // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
@@ -282,13 +345,40 @@ const CounsellorFollowUpAdd = () => {
           "endDate":inpval.date
         }
       })
-  
+
+      ContextValue.updateProgress(60);
+
       totalLead = await totalLead.json();
-      setVisitData(totalLead.totalLead)
+
+      let totalReFollowUp = await fetch('http://localhost:8000/getcounselorReFollowUp',{
+        method:'GET',
+        headers:{
+          "counselorNo":localStorage.getItem("counsellorNo"),
+          "startDate":inpval.date,
+          "endDate":inpval.date
+        }
+      })
+
       setTotalVisitCount(totalLead.totalCount)
-      console.log("lead count =",totalLead);
+      setVisitData(totalLead.totalLead)
+  
+      totalReFollowUp = await totalReFollowUp.json();
+      setReFollowUp(totalReFollowUp.totalFollowUp)
+      console.log("lead count =",totalReFollowUp.totalFollowUp,totalLead.totalCount);
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg();
     }
       catch(error){
+
+        ContextValue.updateProgress(100);
+        ContextValue.updateBarStatus(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
 
       }
 
@@ -357,6 +447,56 @@ const CounsellorFollowUpAdd = () => {
 
   };
 
+  // update re follow up func
+
+  const updateRefollowUp = async (e) => {
+
+    ContextValue.updateProgress(30);
+    ContextValue.updateBarStatus(true);
+
+    e.preventDefault();
+
+    try {
+
+      let url = `http://localhost:8000/counselorFollowUp`
+      ContextValue.updateProgress(60);
+
+      const res = await fetch(`${url}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": localStorage.getItem("counsellor")
+        },
+        body: JSON.stringify(reFollowUp),
+      });
+
+      // ContextValue.updateProgress(60);
+
+      // const data = await res.json();
+
+      console.log("progress bar 100")
+
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg("Visit");
+
+
+    } 
+    catch(error) {
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+
+      console.log("error =", error.message);
+    }
+    
+
+  };
+
   // success message function
 
   const SuccessMsg=()=>{
@@ -364,7 +504,7 @@ const CounsellorFollowUpAdd = () => {
     Swal.fire({
       position: 'center',
       icon: 'success',
-      title: `Visit has beed added`,
+      title: ``,
       showConfirmButton: false,
       timer: 1500
     })
@@ -486,6 +626,86 @@ const CounsellorFollowUpAdd = () => {
       }
   }
 
+  // function to get re follow up date
+
+
+  const getReFollowUpDate = (index, from)=>{
+
+    console.log(' index of student =',index)
+    Swal.fire({
+        title: 'Add Revisit Date',
+        html:
+            `<input id="reVisitDate" type="date" class="swal2-input" placeholder="Add Date">,
+            <input id="remark" type="text" class="swal2-input" placeholder="Add Remarks">`,
+        inputAttributes: {
+          autocapitalize: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          const reFollowUpDate = document.getElementById('reVisitDate').value;          
+          const remark = document.getElementById('remark').value;      
+          
+          if(from=="from follow up") 
+            { let tempVisitData = visitData;
+            tempVisitData[index].lastFollowUpDate = reFollowUpDate 
+            tempVisitData[index].FollowUp.push({
+              date:reFollowUpDate,
+              remark:remark
+            })
+
+            console.log("temp visit data from re follow up date=",tempVisitData)
+  
+            setVisitData(tempVisitData)
+          }
+
+            else{
+
+              let tempReFollowUpDate = reFollowUp;
+            tempReFollowUpDate[index].lastFollowUpDate = reFollowUpDate 
+            tempReFollowUpDate[index].FollowUp.push({
+              date:reFollowUpDate,
+              remark:remark
+            })
+
+            console.log("temp visit data from re follow up date=",tempReFollowUpDate)
+  
+            setReFollowUp(tempReFollowUpDate)
+
+            }
+
+            // addNewSubCourse(courseName,courseCode,mainCourse)
+          Swal.fire({
+            title: `Re Follow Up date has been added`,
+            
+            imageUrl: result.value.avatar_url
+          })
+        }
+      })
+  }
+
+  // set Re follow up status
+
+  const setRefollowupStatus  =(index, value)=>{
+    let tempRefollowUp  = reFollowUp;
+    tempRefollowUp[index].status = value;
+    tempRefollowUp[index].lastFollowUpDate = "";
+
+    setReFollowUp(tempRefollowUp)
+  }
+
+  // set follow up status
+
+  const setfollowupStatus  =(index, value)=>{
+    let tempReVisit  = visitData;
+    tempReVisit[index].status = value;
+
+    setVisitData(tempReVisit)
+  }
   return (
     <>
       <Header />
@@ -534,8 +754,16 @@ const CounsellorFollowUpAdd = () => {
 
               
               
+            
             </div>
-            <div className="row">
+
+            <div className="btn-group d-flex">
+<button className="btn btn-primary"  onClick={()=>setBtnStatus("Today Follow Up")}>Today Follow Up</button>
+<button className="btn btn-primary" onClick={()=>setBtnStatus("Re Follow Up")}>Re Follow Up</button>
+<button className="btn btn-primary" onClick={()=>setBtnStatus("Add Follow Up")}>Add Follow Up</button>
+</div>
+
+            {btnStatus=="Add Follow Up" && <div className="row">
               <div className="col-xl-12 col-xxl-12 col-sm-12">
                 <div className="card">
                   <div className="card-header">
@@ -743,14 +971,14 @@ const CounsellorFollowUpAdd = () => {
 
 
 
-            </div>
+            </div>}
           </div>
 
           
 
         </div>
 
-       {visitData.length>0 && <div className="content-body">
+       {(btnStatus=="Today Follow Up" || btnStatus=="Add Follow Up" ) && <div className="content-body">
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <tr>
           <th>Course</th>
@@ -758,6 +986,7 @@ const CounsellorFollowUpAdd = () => {
           <th>Date</th>
           <th>Remark</th>
           <th>Status</th>
+          <th>Show</th>
           <th>Delete</th>
           </tr>
       {visitData.map((element,index)=>{
@@ -773,7 +1002,10 @@ const CounsellorFollowUpAdd = () => {
                         name="status"
                         class="custom-select mr-sm-2"
                         defaultValue={element.status}
-                        onChange={(e)=>setINP({...inpval, [e.target.name]:e.target.value})}
+                        onChange={(e)=>{setfollowupStatus(index,e.target.value);if (e.target.value === "Re Follow Up") {
+                          getReFollowUpDate(index, "from follow up");
+                        }
+                      }}
                       
                     >
                         <option disabled>--Select Follow Up Status--</option>
@@ -784,6 +1016,7 @@ const CounsellorFollowUpAdd = () => {
                                 <option value="Re Follow Up" >Re Follow Up</option>                                            
                         
                     </select>
+         <td class="cursor-pointer" onClick={e=>{showRefollowupDate(index,"from follow up")}}> see </td>
          <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.name, element.mobile)}}> X </td>
          </tr>
         )
@@ -798,6 +1031,61 @@ const CounsellorFollowUpAdd = () => {
                             // disabled={allFieldStatus===false?true:false}
                           >
                             Submit Follow Up
+                          </button>
+      </div>
+        </div>}
+
+        {(btnStatus=="Re Follow Up" ) && <div className="content-body">
+        <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <tr>
+          <th>Course</th>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Remark</th>
+          <th>Status</th>
+          <th>Show</th>
+          </tr>
+      {reFollowUp.map((element,index)=>{
+        return(
+          <tr>
+         <td> {element.Course} </td>
+         <td> {element.name} </td>
+         <td> {element.date} </td>
+         <td> {element.remark} </td>
+         <select
+                        id="exampleInputPassword1"
+                        type="select"
+                        name="status"
+                        class="custom-select mr-sm-2"
+                        defaultValue={element.status}
+                        onChange={(e)=>{setRefollowupStatus(index,e.target.value);if (e.target.value === "Re Follow Up") {
+                          getReFollowUpDate(index,"from re follow up");
+                        }}}
+                      
+                    >
+                        <option disabled>--Select Re Follow Up Status--</option>
+                    
+                                <option value="Registered" >Registered</option>
+                                <option value="Added" >Added</option>
+                                <option value="Not Interested" >Not Interested</option>                                            
+                                <option value="Re Follow Up" >Re Follow Up</option>                                            
+                        
+                    </select>
+         <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.name, element.mobile)}}> X </td>
+         <td class="cursor-pointer" onClick={e=>{showRefollowupDate(index,"from re follow up")}}> X </td>
+         </tr>
+        )
+      })}
+      </table>
+
+      <div className="d-flex">
+      <button
+                            type="submit"
+                            onClick={updateRefollowUp}
+                            className="btn btn-primary"            
+                            // disabled={allFieldStatus===false?true:false}
+                          >
+                            Submit Re Follow Up
                           </button>
       </div>
         </div>}

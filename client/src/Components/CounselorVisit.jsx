@@ -264,6 +264,7 @@ export default function CounselorVisit() {
           <th>Name</th>
           <th>Mobile</th>
           <th>Status</th>
+          <th>Visit Date</th>
           </tr>
       {data.visitstudent.map((element,index)=>{
         return(
@@ -272,6 +273,7 @@ export default function CounselorVisit() {
          <td> {element.name} </td>
          <td> {element.mobile} </td>
          <td> {element.visitStatus} </td>
+         <td> {element.visitDate} </td>
          </tr>
         )
       })}

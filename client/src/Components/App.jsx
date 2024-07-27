@@ -102,6 +102,7 @@ import CounsellorVisitAdd from './Counselor/CounsellorVisitAdd'
 import CounselorVisit from './CounselorVisit'
 import CounsellorFollowUpAdd from './Counselor/CounsellorFollowUpAdd'
 import CounsellorFollowUp from './CounsellorFollowUp'
+import CounsellorTotalLead from './Counselor/CounsellorTotalLead'
 
 // import Navbaar from './components/Navbaar';
 export default function App() {
@@ -120,6 +121,7 @@ export default function App() {
             <Route exact path='/addCommerceData' element={<AddCommerceData />} />
             <Route exact path='/Forget-Password' element={<ForgetPassword />} />
             <Route exact path='admin/' element={<Home />} />
+            <Route exact path='/counsellor/Today-Lead' element={<CounsellorTotalLead/>} />
             <Route exact path='/counsellor/Add-Counsellor-Lead' element={<CounsellorLeadAdd/>} />
             <Route exact path='/counsellor/Add-Counsellor-Demo' element={<CounsellorDemoAdd/>} />
             <Route exact path='/counsellor/Add-Counsellor-Visit' element={<CounsellorVisitAdd/>} />

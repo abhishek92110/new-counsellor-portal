@@ -180,6 +180,43 @@ export default function CounsellorFollowUp() {
     }
   }
 
+  // counsellor follow up data
+
+  const showRefollowupDate = (data) => {  
+    
+    const followUpData =data.FollowUp;
+  
+    let tableHTML = '<table border="1" style="width: 100%; text-align: left;">';
+    tableHTML += '<tr><th>Date</th><th>Remark</th></tr>';
+  
+    followUpData.forEach(data => {
+        tableHTML += `<tr><td>${data.date}</td><td>${data.remark}</td></tr>`;
+    });
+  
+    tableHTML += '</table>';
+  
+    Swal.fire({
+        title: 'Follow Up Date',
+        html: tableHTML,
+        inputAttributes: {
+          autocapitalize: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+          
+  
+            Swal.fire({
+                title: ``,
+                imageUrl: result.value.avatar_url
+            });
+        }
+    });
+  };
+
   return (
 
     <>
@@ -266,6 +303,7 @@ export default function CounsellorFollowUp() {
           <th>Date</th>
           <th>Remark</th>
           <th>Status</th>
+          <th>Show</th>
           </tr>
       {data.visitstudent.map((element,index)=>{
         return(
@@ -276,6 +314,9 @@ export default function CounsellorFollowUp() {
          <td> {element.date} </td>
          <td> {element.remark} </td>
          <td> {element.status} </td>
+         <td onClick={()=>{
+          showRefollowupDate(element)
+         }}> See </td>
          </tr>
         )
       })}

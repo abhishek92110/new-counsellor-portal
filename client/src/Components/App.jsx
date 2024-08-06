@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Header from './Header'
 import Home from './Home'
+import AdminHome from './AdminHome'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
 import AllStudents from '../Students/AllStudents'
@@ -120,7 +121,7 @@ export default function App() {
             {/* <Route exact path='/' element={<RegistartionHome />} /> */}
             <Route exact path='/addCommerceData' element={<AddCommerceData />} />
             <Route exact path='/Forget-Password' element={<ForgetPassword />} />
-            <Route exact path='admin/' element={<Home />} />
+            <Route exact path='/admin' element={<AdminHome />} />
             <Route exact path='/counsellor/Today-Lead' element={<CounsellorTotalLead/>} />
             <Route exact path='/counsellor/Add-Counsellor-Lead' element={<CounsellorLeadAdd/>} />
             <Route exact path='/counsellor/Add-Counsellor-Demo' element={<CounsellorDemoAdd/>} />

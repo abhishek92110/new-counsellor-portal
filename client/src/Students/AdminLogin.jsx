@@ -10,7 +10,7 @@ import { HashLoader } from "react-spinners";
 
 
 
-  export default function LogIn() {
+  export default function AdminLogin() {
 
   document.title="StudentDashboard - Log In Panel"
 
@@ -36,7 +36,7 @@ import { HashLoader } from "react-spinners";
     e.preventDefault()
     console.log('login', login, user)
     
-    let body = user=="admin"?JSON.stringify({ email: login.counselorNo, password: login.password }):JSON.stringify({ counselorNo: login.counselorNo, password: login.password })
+    
 
     try{
     let data = await fetch(`http://localhost:8000/${user}`, {
@@ -45,8 +45,7 @@ import { HashLoader } from "react-spinners";
       headers: {
         "Content-Type": "application/json"
       },
-
-      body: body
+      body: JSON.stringify({ counselorNo: login.counselorNo, password: login.password })
 
     })
       ContextValue.updateProgress(60)
@@ -61,12 +60,7 @@ import { HashLoader } from "react-spinners";
         ContextValue.updateStudent(login.counselorNo, login.password)
         console.log("data is  =",data)
         localStorage.setItem(`${user}`,data.authtoken)
-        
-        if(user=="counsellor"){
-          localStorage.setItem(`counsellorNo`,data.username.counselorNo)
-          localStorage.setItem(`assignedAd`,JSON.stringify(data.username.assignedAd))
-        }
-        
+        localStorage.setItem(`counsellorNo`,data.username.counselorNo)
         ContextValue.updateLoggedInPerson(data.username)
         console.log("user =",user)
         history(`/${user}`);

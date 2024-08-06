@@ -27,6 +27,9 @@ const CounsellorTotalLead = () => {
   const [visitData, setVisitData] = useState([])
   const [followUpData, setFollowUpData] = useState([])
   const [currentDate, setCurrentDate]  = useState([])
+  const [addedLead, setAddedLead] = useState([])
+  const [assignedAd, setAssignedAd] = useState([])
+  const [id, setId] = useState({})
 
   // const location = useLocation();
   // const { counselor } = location.state;
@@ -41,15 +44,54 @@ const CounsellorTotalLead = () => {
   }, []);
 
   const fetchUser = ()=>{
+
     if(localStorage.getItem("counsellor")){
       getAllCourse();
       getTrainer();
       getCounselor();
+      getCounsellorAd();
     }
 
     else{
       navigate('/')
     }
+  }
+
+  // get all counsellor ad
+
+  const getCounsellorAd = async()=>{
+
+    try
+    {
+      let counsellorAd = await fetch('http://localhost:8000/getCounsellorAd',{
+        method:'GET',
+        headers:{
+          "counselorNo":localStorage.getItem("counsellorNo")
+        }
+      })
+
+      ContextValue.updateProgress(60);
+  
+      counsellorAd = await counsellorAd.json();
+      console.log("counsellorAd =",counsellorAd,counsellorAd.cousnellorDataAd);
+      setAssignedAd(counsellorAd.cousnellorDataAd)
+      ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      SuccessMsg(leadStatus);
+    }
+      catch(error){
+
+        console.log("error =",error.message)
+        ContextValue.updateProgress(100);
+      ContextValue.updateBarStatus(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+
+      }
+
   }
 
   const getCounselor = async () => {
@@ -70,6 +112,7 @@ const CounsellorTotalLead = () => {
     Count:"",
     Day: "",
     date: "",
+    endDate:"",
     Course: "",
     subCourse: "",
     Counselor: "",
@@ -82,11 +125,13 @@ const CounsellorTotalLead = () => {
     sttaus:"",
   });
 
-  const [leadData, setLeadData] = useState({
+  const [allLeadData, setAllLeadData] = useState({
+    id:"",
     date:"",
-    counselorNo:"",
-    student:[]
+    students:[]
   })
+
+  const [leadData, setLeadData] = useState([])
 
   function isAllFieldsFilled() {
     for (const key in inpval) {
@@ -102,112 +147,45 @@ const CounsellorTotalLead = () => {
     return true; // Return true if all fields are filled
   }
 
-  // delete course lead function
 
-  const deleteCourseLead =(courseName, lead)=>{
+  // setStartEnd Date function
 
-    console.log("course name =",courseName)
+  const setStartEndate = (timeValue) => {
+    console.log("start and end date =", timeValue);
+    let today = new Date(timeValue);
+    let startDate, endDate;
+  
+   
+        startDate = today;
+        endDate = new Date(today);
+  
+    // Add one day to endDate
+    endDate.setDate(endDate.getDate() + 1);
+  
+    const startDateStr = formatDate(startDate);
+    const endDateStr = formatDate(endDate);
+    console.log("start date and end date =", startDateStr, endDateStr);
+    setINP({...inpval, ["date"]: startDateStr, ["endDate"]: endDateStr});
+  
+    return { startDate: startDateStr, endDate: endDateStr };
+};
 
-    let tempcourseLead = inpval.Leadby.filter(data=>{
-      return (!(data.course==courseName && data.lead==lead))
-    })
+// format date function
 
-    console.log("temp course lead =",tempcourseLead)
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, '0');
+const month = String(parseInt(date.getMonth()) + 1).padStart(2,'0')
+const year = date.getFullYear();
 
-    let totalcount = 0;
+return (`${year}-${month}-${day}`)
+};
 
-    tempcourseLead.map(data=>{
-
-      totalcount = totalcount + parseInt(data.count)
-
-    })
-
-    setINP({ ...inpval, ["Leadby"]: tempcourseLead, ["totalCount"]:totalcount});
-
-    setCurrentCourseCount((prevData)=>{
-      let tempcurrentCount = [...prevData];
-
-      tempcurrentCount.map((data,index)=>{
-
-        if(data.course==courseName && data.lead==lead){
-          tempcurrentCount[index] = {
-            course:data.course,
-            count:"",
-            lead:data.lead,
-            checked:false
-          }
-        }
-      })
-
-      return tempcurrentCount;
-    })
-
-
-  }
-
-  const addinpdata = async (e) => {
-    e.preventDefault();
-    if(inpval.leadfrom==""){
-      alert("please select lead category")
-    }
-    else{
-      console.log('inpval data =',inpval, leadStatus)
-      let tempCourseLead = inpval.Leadby;
-
-    allcourse.map((data,index)=>{
-    console.log("inside map =",(document.getElementsByClassName('checkboxClass')[index].checked)==true)
-
-      if((document.getElementsByClassName('checkboxClass')[index].checked)==true){
-        // tempCourseLead.push({
-        //   course:data.course,
-        //   count:document.getElementsByClassName("count-input")[index].value,
-        //   lead:inpval.leadfrom
-        // })
-
-         let prevCourseLead = false;
-
-    tempCourseLead.map(element=>{
-      if(element.course==data.course && element.lead==inpval.leadfrom){
-        element.count = document.getElementsByClassName("count-input")[index].value
-        prevCourseLead = true;
-      }
-    })
-
-    if(!prevCourseLead)
-      {
-
-    let tempObj = {
-      course:data.course,
-      count:document.getElementsByClassName("count-input")[index].value,
-      lead:inpval.leadfrom
-    }
-
-    tempCourseLead.push(tempObj);
-  }
-
-      }
-
-    })
-
-
-  let totalcount = 0;
-
-  tempCourseLead.map(data=>{
-
-      totalcount = totalcount + parseInt(data.count)
-
-    })
-
-    console.log("course lead temp =",tempCourseLead)
-
-    setINP({ ...inpval, ["course"]: tempCourseLead, ["totalCount"]:totalcount});}
-    
-
-  };
 
   // get selected date data
 
   const getLeadData = async()=>{
+
+    console.log("asssigned ad from getLead route=",assignedAd,id)
 
     ContextValue.updateProgress(30);
     ContextValue.updateBarStatus(true);
@@ -215,27 +193,80 @@ const CounsellorTotalLead = () => {
     // console.log("counsellor no from getLead =",localStorage.getItem("counsellorNo"),rangeDate.startDate,rangeDate.endDate)
 
     try{
-      let totalLead = await fetch('http://localhost:8000/readSheetData',{
+
+      // let totalLeadAdded = await fetch('http://localhost:8000/getcounselorLeadCount',{
+      //   method:'GET',
+      //   headers:{
+      //     "counselorNo":localStorage.getItem("counsellorNo"),
+      //     "startDate":inpval.date,
+      //     "endDate":inpval.date
+      //   }
+      // })
+
+      // totalLeadAdded = await totalLeadAdded.json()
+      // if(totalLeadAdded.totalLead.length>0){
+      //   console.log("if condition")
+      // console.log("added lead =",totalLeadAdded)
+
+      // setAddedLead(totalLeadAdded.totalLead[0].student)
+      // setVisitData(totalLeadAdded.totalVisit)
+      // setDemoData(totalLeadAdded.totalDemo)
+      // setFollowUpData(totalLeadAdded.totalFollowUp)
+      
+      // }
+
+
+      let totalLead = await fetch('http://localhost:8000/getRangefacebookLeadData',{
         method:'GET',
         headers:{
-          "counselorNo":localStorage.getItem("counsellorNo"),
+          "id":id,
           "startDate":inpval.date,
-          "endDate":inpval.date
+          "endDate":inpval.endDate
         }
       })
 
       ContextValue.updateProgress(60);
   
       totalLead = await totalLead.json();
-      console.log("lead count =",totalLead);
-      if(totalLead.filteredRows.length>0)
-      {
+      // setCurrentAdId(totalLead.adId)
+      console.log("lead count facebok data=",totalLead,totalLead.adId);
+      setLeadData(totalLead.data)
+      setAllLeadData({...allLeadData, ["students"]:totalLead.data, ["date"]:inpval.date, ["id"]:totalLead.adId})
+    //   if(totalLead.filteredRows.length>0)
+    //   {
 
-        setINP(totalLead.filteredRows)
-        setLeadData({...leadData,["date"]:currentDate, ["student"]:totalLead.filteredRows})
-        
+    //     if(totalLeadAdded.totalLead.length>0)
+    //     {
+    //     if(totalLead.filteredRows.length==totalLeadAdded.totalLead[0].student.length)
+    //       {
+    //     setINP(totalLeadAdded.totalLead[0].student)
+    //     setLeadData({...leadData,["date"]:currentDate, ["student"]:totalLeadAdded.totalLead[0].student}) 
+    //     }  
+    //   }
+    //   else{
+    //     setINP(totalLead.filteredRows)
+    //     setLeadData({...leadData,["date"]:currentDate, ["student"]:totalLead.filteredRows}) 
+    //   }
 
-      }
+
+    //     if(totalLeadAdded.totalLead.length>0)
+    //     {
+    //     if(totalLead.filteredRows.length>totalLeadAdded.totalLead[0].student.length)
+    //       {
+    //     let tempInpval = totalLeadAdded.totalLead[0].student;
+
+    //     for(let i=((totalLeadAdded.totalLead[0].student.length)-1); i<((totalLead.filteredRows.length-1)); i++){
+    //       tempInpval.push(totalLead.filteredRows[i])
+    //     }
+
+
+    //     setINP(tempInpval)
+    //     setLeadData({...leadData,["date"]:currentDate, ["student"]:tempInpval }) 
+
+    //     }   
+
+    //   }
+    // }
       // setINP({...inpval,["totalCount"]:totalLead.totalCount})
 
       ContextValue.updateProgress(100);
@@ -279,11 +310,12 @@ const CounsellorTotalLead = () => {
     // console.log("register value =", tempInpVal);
 
     let tempLeadData = leadData;
-    tempLeadData.student  = inpval
 
+    let tempAllLeadData = allLeadData;
+    tempAllLeadData.students = leadData
 
-    try {
-
+    try 
+    {
       let url = `http://localhost:8000/counselorLead`
       ContextValue.updateProgress(60);
 
@@ -293,7 +325,7 @@ const CounsellorTotalLead = () => {
           "Content-Type": "application/json",
           "auth-token": localStorage.getItem("counsellor")
         },
-        body: JSON.stringify(tempLeadData),
+        body: JSON.stringify(tempAllLeadData),
       });
 
       // ContextValue.updateProgress(60);
@@ -523,70 +555,6 @@ const CounsellorTotalLead = () => {
     setTrainer(trainerData);
   };
 
-  const setTrainerData = (e) => {
-    console.log(
-      "trainer data =",
-      e.target.selectedIndex,
-      trainerData[e.target.selectedIndex],
-      trainerData
-    );
-    setINP({
-      ...inpval,
-      [e.target.name]: e.target.value,
-      ["TrainerId"]: trainer[e.target.selectedIndex - 1].code,
-    });
-
-    const status = isAllFieldsFilled();
-    setAllFieldStatus(status);
-  };
-
-  const setMainCourse = (subCourse) => {
-    let mainCourse;
-    let courseCode;
-    course.map((data) => {
-      data.subCourse.map((element) => {
-        if (element.course === subCourse) {
-          mainCourse = data.mainCourse;
-          courseCode = element.courseCode;
-          console.log("element =",element)
-        }
-      });
-    });
-
-    console.log("sub and main Course =", subCourse, mainCourse,courseCode,course);
-    setINP({ ...inpval, ["Course"]: mainCourse, ["subCourse"]: subCourse, ["courseCode"]:courseCode });
-
-    const status = isAllFieldsFilled();
-    setAllFieldStatus(status);
-  };
-
-  const setCounselorData = (e) => {
-    console.log(
-      "select index =",
-      e.target.selectedIndex,
-      counselor[e.target.selectedIndex - 1].counselorNo
-    );
-    setINP({
-      ...inpval,
-      ["CounselorId"]: counselor[e.target.selectedIndex - 1].counselorNo,
-      ["counselorNumber"]: counselor[e.target.selectedIndex - 1].Number,
-      ["Counselor"]: e.target.value,
-      ["counselorReference"]:
-        counselor[e.target.selectedIndex - 1].counselorReference,
-    });
-    const status = isAllFieldsFilled();
-    setAllFieldStatus(status);
-  };
-
-  const setMethod = (value) => {
-    setMethodStatus(value);
-    if (value === "EMI") {
-      setINP({ ...inpval, ["PaymentMode"]: value, ["PaymentMethod"]: value });
-      const status = isAllFieldsFilled();
-      setAllFieldStatus(status);
-    }
-  };
-
   // update current array 
 
   const updateCurrentArr = (lead)=>{
@@ -673,27 +641,6 @@ const CounsellorTotalLead = () => {
   // }
 
 
-  const setCurrentCourseCountFunc = (index, value, from) => {
-    console.log("set current course count func =", index, value, from);
-
-    setCurrentCourseCount((prevState) => {
-      const tempCourseCount = [...prevState];
-      if (from === "checkbox") {
-        tempCourseCount[index].checked = document.getElementsByClassName("checkboxClass")[index].checked;
-        if((document.getElementsByClassName("checkboxClass")[index].checked)==false){
-          let tempInpValLeadBy = inpval.Leadby.filter(data=>{
-            return(!(data.course==currentCourseCount[index].course && data.lead==currentCourseCount[index].lead))
-          })
-
-          setINP({...inpval, ["Leadby"]:tempInpValLeadBy})
-        }
-      } else {
-        tempCourseCount[index].count = value;
-      }
-      return tempCourseCount;
-    });
-  };
-
 
   function formatDateString(dateString) {
     // Create a Date object from the ISO 8601 string
@@ -712,9 +659,10 @@ const CounsellorTotalLead = () => {
 
 const addStatus  =(value,element,index)=>{
 
-  if(inpval[index].status=="")
-  {
+  console.log('value and index status =',value,element)
 
+  if(leadData[index].status=="")
+  {
   if(value=="Demo"){
     addDemo(element,index, value)
   }
@@ -726,26 +674,29 @@ const addStatus  =(value,element,index)=>{
   }
 }
 
-else if(inpval[index].status!=value){
-  if(inpval[index].status=="Demo"){
+else if(leadData[index].status!=value)
+  {
+  if(leadData[index].status=="Demo"){
     let tempDemoData = demoData;
     let tempDemoStudent = tempDemoData.demoStudent.filter(data=>{
-        return (!(data.name==element.name && data.mobile==element.mobile))
+        return (!(data.id==element.id))
     })
 
     tempDemoData.demoStudent  = tempDemoStudent;
     setDemoData(tempDemoData)
   }
-  else if(inpval[index].status=="Visit"){
+  else if(leadData[index].status=="Visit"){
     let tempVisitData = visitData.filter(data=>{
-        return (!(data.name==element.name && data.mobile==element.mobile))
+        return (!(data.id==element.id))
     })
+
+    console.log("temp visit data =",tempVisitData)
 
     setVisitData(tempVisitData)
   }
-  else if(inpval[index].status=="Follow Up"){
+  else if(leadData[index].status=="Follow Up"){
     let tempFollowUpData = followUpData.filter(data=>{
-        return (!(data.name==element.name && data.mobile==element.mobile))
+        return (!(data.id==element.id))
     })
 
     setFollowUpData(tempFollowUpData)
@@ -786,30 +737,35 @@ const addDemo = (element, index, value)=>{
 
         const demoDate = document.getElementById('demoDate').value;
         const trainer = document.getElementById('trainer').value;
-        
 
         let tempDemoData = demoData;
 
-        tempDemoData.date = currentDate;
+        tempDemoData.date = inpval.date;
 
-        let obj = {
-          name:element.name,
-          course:element.course,
-          mobile:element.mobile,
-          trainer:trainer,
-          status:"Schedule",
-          reschedule:demoDate,
-          scheduleDate:currentDate
-        }
+        let obj = {}
+
+        element.field_data.map(data=>{
+          
+          obj[data.name] = data.values
+
+        })
+
+        obj.trainer=trainer
+        obj.status="Schedule"
+        obj.demoStatus=""
+        obj.reschedule=demoDate
+        obj.scheduleDate=currentDate  
+        obj.id = element.id      
 
         tempDemoData.demoStudent.push(obj)
+        console.log("temp demo data =",tempDemoData,element.field_data)
         setDemoData(tempDemoData)
 
-        let tempInpVal = inpval;
-        tempInpVal[index].status=value
-        setINP(tempInpVal)
+        let tempLeadData = leadData;
+        tempLeadData[index].status = value
+        setLeadData(tempLeadData)
 
-        console.log("temp demo student =",tempDemoData)
+        console.log("temp demo student =",tempDemoData,tempLeadData)
 
         Swal.fire({
           title: `${result.value}`,
@@ -824,7 +780,7 @@ const addDemo = (element, index, value)=>{
 
 const addVisit = (element, index, value)=>{
 
-  console.log(' index of student =',index)
+  console.log(' index of student =',index, visitData)
   Swal.fire({
       title: 'Add Visit Date',
       html:
@@ -845,26 +801,32 @@ const addVisit = (element, index, value)=>{
         
         let tempVisitData = visitData;
 
-        let obj = {
-          date:currentDate,
-          name:element.name,
-          course:element.course,
-          mobile:element.mobile,
-          visitTrainer:"",
-          visitCounsellor:"",
-          visitDate:visitDate,
-          visitStatus:"Schedule",
-        }
+        let objNew = {}
+        let obj ={}
+
+        element.field_data.map(data=>{
+          
+          objNew[data.name] = data.values
+
+        })
+      
+          obj.students = objNew
+          obj.date = currentDate
+          obj.visitTrainer = ""
+          obj.visitCounsellor = ""
+          obj.visitDate = visitDate
+          obj.visitStatus = "Schedule"
+          obj.id = element.id
+       
 
         tempVisitData.push(obj)
         setVisitData(tempVisitData)
 
-        let tempInpVal = inpval;
-        tempInpVal[index].status=value
-        setINP(tempInpVal)
+        let tempLeadData = leadData;
+        tempLeadData[index].status=value
+        setLeadData(tempLeadData)
 
-
-        console.log("tempVisitData =",tempVisitData)
+        console.log("tempVisitData =",tempVisitData, tempLeadData)
 
         Swal.fire({
           title: `${result.value}`,
@@ -901,29 +863,37 @@ const addFollowUp = (element, index, value)=>{
         
 
         let tempFollowUpData = followUpData;
-      
-        let obj = {
-          name:element.name,
-          course:element.course,
-          mobile:element.mobile,
-          status:"Schedule",
-          FollowUp:[{
+
+        let obj = {}
+        let objNew = {}
+
+        element.field_data.map(data=>{
+          
+          objNew[data.name] = data.values
+
+        })
+
+          obj.students = objNew
+          obj.status="Schedule"
+          obj.FollowUp=[{
             date:followUpDate,
             remark:remark
-          }],
-          lastFollowUpDate:followUpDate,
-          status:"Schedule"
-        }
+          }]
+          obj.lastFollowUpDate=followUpDate
+          obj.status="Schedule"
+          obj.date=currentDate
+          obj.id=element.id
+       
 
         tempFollowUpData.push(obj)
         setFollowUpData(tempFollowUpData)
 
-        let tempInpVal = inpval;
-        tempInpVal[index].status=value
-        setINP(tempInpVal)
+        let tempLeadData = leadData;
+        tempLeadData[index].status=value
+        setLeadData(tempLeadData)
 
 
-        console.log("temp demo student =",tempFollowUpData)
+        console.log("temp demo student =",tempFollowUpData, tempLeadData)
 
         Swal.fire({
           title: `${result.value}`,
@@ -950,9 +920,34 @@ const addFollowUp = (element, index, value)=>{
 
               <div className="col-sm-6 p-md-0">
                 <div className="welcome-text">
-                  <h4>Total Lead: {inpval.length}</h4>
+                  <h4>Total Lead:</h4>
+
+ {
+                assignedAd.length>0 && 
+
+                <select
+                id="exampleInputPassword1"
+                type="select"
+                name="leadfrom"
+                class="custom-select mr-sm-2"
+                onChange={(e)=>{setId(e.target.value)}}
+              
+            >
+              <option selected disabled>--Select Ad--</option>
+
+             {   assignedAd.map(data=>{
+                   return(
+                    <option value={data.id}>{data.name}</option>
+                   )
+                })}
+                
+            </select>
+              }
+
                 </div>
               </div>
+
+             
 
               <div className="col-lg-6 col-md-6 col-sm-12">
                           <div className="form-group">
@@ -962,10 +957,7 @@ const addFollowUp = (element, index, value)=>{
                             <input
                               type="date"
                               onChange={(e) => {
-                                setINP({
-                                  ...inpval,
-                                  [e.target.name]: e.target.value,
-                                });
+                                setStartEndate(e.target.value);
                                 setCurrentDate(e.target.value)
                               }}
                               name="date"
@@ -984,6 +976,74 @@ const addFollowUp = (element, index, value)=>{
           
 
         </div>
+
+        {leadData.length>0 && 
+        <>
+             <table id="datatable" class="table table-striped table-bordered lead-table" cellspacing="0" width="100%">
+            <tr>
+         {
+          leadData[0].field_data.map((data,index)=>{
+                       return(
+                        <th>{data.name}</th>
+                       )
+          })}
+         
+        <th>Status</th>
+
+          </tr>
+      {leadData.map((element,index)=>{
+        return(
+          <tr>
+            {
+
+              element.field_data.map(data=>{
+                return(
+
+                <td> {data.values} </td>
+                )
+
+                
+
+              })
+            }
+         <select
+                        id="exampleInputPassword1"
+                        type="select"
+                        name="leadfrom"
+                        class="custom-select mr-sm-2"
+                        onChange={(e)=>{
+                          addStatus(e.target.value,element,index)
+                        }}
+                        defaultValue={element.status}                      
+                    >
+                        <option disabled selected >--select Status--</option>
+                    
+                                <option value="Demo">Demo</option>
+                                <option value="Visit" >Visit</option>
+                                <option value="Follow Up" >Follow Up</option>                     
+                        
+                    </select>
+           
+         </tr>
+        )
+      })}
+      </table>
+      
+
+      <div className="d-flex mt-2">
+      <button
+                            type="submit"
+                            onClick={addinpdataMail}
+                            className="btn btn-primary"            
+                            // disabled={allFieldStatus===false?true:false}
+                          >
+                            Submit Lead
+                          </button>
+                          </div>
+     
+      </>
+      }
+
 
        {inpval.length>0 && <div className="content-body">
         <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
@@ -1009,7 +1069,7 @@ const addFollowUp = (element, index, value)=>{
                         onChange={(e)=>{
                           addStatus(e.target.value,element,index)
                         }}
-                      
+                        defaultValue={element.status}                      
                     >
                         <option disabled selected >--select Status--</option>
                     

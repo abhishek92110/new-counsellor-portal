@@ -11,19 +11,78 @@ $U,cbB%$
 counselor - 3
 
 
-   ContextValue.updateProgress(30);
-    ContextValue.updateBarStatus(true);
+form id user data 
 
-    ContextValue.updateProgress(60);
+GET https://graph.facebook.com/v14.0/{form_id}/leads?access_token=YOUR_ACCESS_TOKEN
 
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      SuccessMsg(leadStatus);
 
-      ContextValue.updateProgress(100);
-      ContextValue.updateBarStatus(false);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Something went wrong!",
-      });
+form id from ad id
+
+GET https://graph.facebook.com/v14.0/{ad_id}?fields=creative&access_token=YOUR_ACCESS_TOKEN
+
+
+to get the ad of specific account
+
+GET https://graph.facebook.com/v14.0/act_{ad_account_id}/ads?fields=id,name,status,creative,insights{impressions,clicks,spend}&filtering=[{"field":"effective_status","operator":"IN","value":["ACTIVE","PENDING_REVIEW","IN_PROCESS"]}]&access_token=YOUR_ACCESS_TOKEN
+
+
+to get the all ads account 
+https://graph.facebook.com/v14.0/me/adaccounts?field=id,name&access_token=YOUR_ACCESS_TOKEN
+
+
+
+
+not getting data
+
+"name": "full stack developer traffic"
+
+"name": "AI TRAFFIC"
+
+"name": "New Traffic Data Science"
+
+"name": "Full Stack Web"
+
+"id": "6647354349182",
+"name": "New Traffic Ad",
+
+
+{
+  "data": [
+    {
+      "account_id": "351689515",
+      "id": "act_351689515"
+    },
+    {
+      "account_id": "2516170511788376",
+      "id": "act_2516170511788376"
+    },
+    {
+      "account_id": "342189166645122",
+      "id": "act_342189166645122"
+    },
+    {
+      "account_id": "821851351835421",
+      "id": "act_821851351835421"
+    },
+    {
+      "account_id": "641864444351784",
+      "id": "act_641864444351784"
+    }
+  ],
+  "paging": {
+    "cursors": {
+      "before": "NjAwMjc0NzE5NDE4MgZDZD",
+      "after": "MjM4NTE3NzMzNDQ4MDAyMDcZD"
+    }
+  }
+}
+
+
+permission
+
+email
+pages_show_list
+ads_management
+ads_read
+leads_retrieval
+pages_read_engagement

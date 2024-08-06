@@ -71,7 +71,7 @@ const CounsellorDemoAdd = () => {
       if((totalLead.totalLead).length>0){
 
       setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
-      console.log("lead count =",totalLead.totalLead);
+      console.log("lead count =",totalLead.totalLead[0].demoStudent);
       setBtnStatus("today-added-demo")
       }
       else{
@@ -243,7 +243,8 @@ const CounsellorDemoAdd = () => {
     let prevnameMobile = false;
 
     tempCourseLead.map(data=>{
-      if(data.name==inpval.name && data.mobile==inpval.mobile){
+      if(data.name==inpval.name && data.mobile==inpval.mobile)
+        {
         data.course=inpval.subCourse
         data.name = inpval.name
         data.mobile = inpval.mobile
@@ -347,11 +348,25 @@ catch(error){
     console.log("register value =", tempInpVal);
 
     let reScheduleStudent = tempInpVal.demoStudent.filter(data=>{
-      return data.status == "ReScheduled"
+      
+           return(data.status == "ReScheduled")    
+
+      
+    }).map(data=>{
+      let obj ={}
+      
+
+        obj.reschedule =data.reschedule
+        obj.scheduleDate = data.scheduleDate
+        obj.id = data.id
+        obj.students = data
+
+        return obj
+     
     })
 
 
-    try {
+   try {
 
       let url = `http://localhost:8000/counselorDemo`
       ContextValue.updateProgress(60);
@@ -372,8 +387,6 @@ catch(error){
       console.log("progress bar 100", res.status)
 
       
-
-
       if(res.status){
       if(reScheduleStudent.length>0){
 
@@ -468,18 +481,20 @@ else{
 
           const rescheduleDate = document.getElementById('rescheduleDate').value;
 
-          if(from=="fromAddedDemo"){
+          if(from=="fromAddedDemo")
+            {
 
-            console.log("from  if=",from)
+            console.log("from  if=",from, reScheduleStudentData)
             let tempInpVal = inpval;
-          tempInpVal.demoStudent[index].reschedule = rescheduleDate;
-          setINP(tempInpVal);
+            tempInpVal.demoStudent[index].reschedule = rescheduleDate;
+            setINP(tempInpVal);
 
           }
 
-          else{
+          else
+          {
 
-            console.log("from  else=",from)
+            console.log("from  else=",from,reScheduleStudentData)
 
             let tempReschedule = reScheduleStudentData;
             tempReschedule[index].reschedule = rescheduleDate
@@ -499,6 +514,75 @@ else{
         }
       })
   }
+
+  // add demo done status
+
+  const getDoneStatus = (index, from) => {
+    console.log('index of student =', index);
+    
+    Swal.fire({
+      title: 'Post Visit Details',
+      html: `
+        <select id="responseInput" class="swal2-input">
+          <option value="" disabled selected>Select Demo Response</option>
+          <option value="Registered">Registered</option>
+          <option value="Follow Up">Follow Up</option>
+          <option value="Not Interested">Not Interested</option>
+        </select>
+        
+      `,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        const responseInput = document.getElementById('responseInput').value;
+        
+        if (!responseInput) {
+          Swal.showValidationMessage('Please enter all details');
+          return false;
+        }
+
+        
+        return {
+          responseInput
+        };
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { responseInput } = result.value;
+
+        if(from=="fromAddedDemo"){
+
+        let tempInpVal = inpval;
+        console.log("tempVisit data =",tempInpVal)
+        tempInpVal.demoStudent[index].demoStatus = responseInput;
+
+        setINP(tempInpVal)
+      }
+
+      else{
+        let tempReScheduleData = reScheduleStudentData;
+        console.log("tempVisit data =",tempReScheduleData)
+        tempReScheduleData[index].demoStatus =responseInput;
+
+        setReScheduleStudent(tempReScheduleData)
+      }
+
+        
+        // Add logic to handle the rescheduled details
+        console.log('Response:', responseInput);
+        
+        Swal.fire({
+          title: 'Details Added',
+          text: `Response: ${responseInput}`
+        });
+      }
+    });
+  };
 
   // function to convert date
 
@@ -595,10 +679,11 @@ else{
     }
   };
 
-  const setDemoStatus = (value, index)=>{
+  const setDemoStatus = (value, index)=>
+    {
 
-    
-    
+    console.log("set demo status")
+
     let tempInpVal  = inpval;
     console.log("indexing value =",tempInpVal.demoStudent[index])
     tempInpVal.demoStudent[index].status = value;
@@ -610,13 +695,18 @@ else{
       addRescheduleDate(index, "fromAddedDemo")
     }
 
-    
+    if(value=="Done")
+      {
+        getDoneStatus(index, "fromAddedDemo")
+    }
 
   }
 
   // update status of reschedule status function
 
   const setRescheduleStatus =(value,index)=>{
+
+    console.log("set reschedule data from function")
 
     let tempInpVal  = reScheduleStudentData;
     console.log("indexing value =",reScheduleStudentData[index])
@@ -625,7 +715,8 @@ else{
 
     setReScheduleStudent(tempInpVal)
 
-    if(value=="ReScheduled"){
+    if(value=="ReScheduled")
+      {
       addRescheduleDate(index,"updateReschedule")
     }
 
@@ -706,7 +797,6 @@ else{
           <th>Course</th>
           <th>Date</th>
           <th>Status</th>
-          <th>Delete</th>
           </tr>
       {inpval.demoStudent.map((element,index)=>{
         return(
@@ -733,7 +823,7 @@ else{
                         
                     </select>
          </td>
-         <td class="cursor-pointer" onClick={e=>{deleteCourseLead(element.name, element.mobile)}}> X </td>
+        
       
          </tr>
         )
@@ -752,6 +842,7 @@ else{
                           </div>
 
         </div>}
+
 
         {(btnStatus=="reschedule-demo") && <div className="content-body">
         <h3>Reschedule Demo</h3>

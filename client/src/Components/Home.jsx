@@ -559,7 +559,8 @@ export default function Home() {
 
   }
 
-  function processMonth(monthString) {
+  function processMonth(monthString) 
+  {
     // Remove leading zero and convert to number
     let monthNumber = parseInt(monthString, 10);
   
@@ -659,7 +660,7 @@ return (`${year}-${month}-${day}`)
                     <div className="card-body" onClick={()=>{navigate("Today-Lead");}}>
                       <div className="media">
                         <span className="mr-3">
-                        <i class="fa-solid fa-plus"/>
+                        <i class="fa-regular fa-address-card"/>
                         </span>
                         <div
                           className="media-body text-white"
@@ -672,36 +673,19 @@ return (`${year}-${month}-${day}`)
                     </div>
                   </div>
                 </div>  
-                <div className="col-xl-3 col-xxl-3 col-sm-6">
-                  <div className="widget-stat card p-0 bg-secondary">
-                    <div className="card-body" onClick={()=>{navigate("Add-Counsellor-Lead");}}>
-                      <div className="media">
-                        <span className="mr-3">
-                        <i class="fa-solid fa-plus"/>
-                        </span>
-                        <div
-                          className="media-body text-white"
-                          
-                        >
-                          <p className="mb-1">Add Today Lead</p>
-                          
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div> 
+
                 <div className="col-xl-3 col-xxl-3 col-sm-6">
                   <div className="widget-stat card p-0 bg-secondary">
                     <div className="card-body" onClick={()=>{navigate("Add-Counsellor-Demo");}}>
                       <div className="media">
                         <span className="mr-3">
-                        <i class="fa-solid fa-plus"/>
+                        <i class="fa-regular fa-address-card"/>
                         </span>
                         <div
                           className="media-body text-white"
                           
                         >
-                          <p className="mb-1">Add Today Demo</p>
+                          <p className="mb-1">Today Demo</p>
                           
                         </div>
                       </div>
@@ -713,13 +697,13 @@ return (`${year}-${month}-${day}`)
                     <div className="card-body" onClick={()=>{navigate("Add-Counsellor-Visit");}}>
                       <div className="media">
                         <span className="mr-3">
-                        <i class="fa-solid fa-plus"/>
+                        <i class="fa-regular fa-address-card"/>
                         </span>
                         <div
                           className="media-body text-white"
                           
                         >
-                          <p className="mb-1">Add Today Visit</p>
+                          <p className="mb-1">Today Visit</p>
                           
                         </div>
                       </div>
@@ -732,13 +716,13 @@ return (`${year}-${month}-${day}`)
                     <div className="card-body" onClick={()=>{navigate("Add-Counsellor-FollowUp");}}>
                       <div className="media">
                         <span className="mr-3">
-                        <i class="fa-solid fa-plus"/>
+                        <i class="fa-regular fa-address-card"/>
                         </span>
                         <div
                           className="media-body text-white"
                           
                         >
-                          <p className="mb-1">Add Today Follow Up</p>
+                          <p className="mb-1">Today Follow Up</p>
                           
                         </div>
                       </div>

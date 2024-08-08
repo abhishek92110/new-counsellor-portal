@@ -146,7 +146,7 @@ const CounsellorDemoAdd = () => {
 
       // setINP({ ...inpval, ["demoStudent"]: totalLead.totalLead[0].demoStudent, ["totalCount"]:totalLead.totalCount});
       console.log("reschedule data =",totalLead.totalLead);
-      setBtnStatus("today-added-demo")
+      setBtnStatus("today-added-demo");
       ContextValue.updateProgress(100);
       ContextValue.updateBarStatus(false);
       SuccessMsg();
@@ -687,11 +687,24 @@ else{
     let tempInpVal  = inpval;
     console.log("indexing value =",tempInpVal.demoStudent[index])
     tempInpVal.demoStudent[index].status = value;
-    console.log("status value =",index,value, tempInpVal)
+    console.log("status value =",index,value, tempInpVal, reScheduleStudentData.length)
+
+    if(reScheduleStudentData.length>=(index+1))
+      {
+
+    console.log("else value  = ",index)
+    let tempInpVal2  = reScheduleStudentData;
+    console.log("indexing value =",reScheduleStudentData[index])
+    tempInpVal2[index].status = value;
+    console.log("status value =",index,value,tempInpVal2)
+
+    setReScheduleStudent(tempInpVal2)
+    }
 
     setINP(tempInpVal)
 
-    if(value=="ReScheduled"){
+    if(value=="ReScheduled")
+      {
       addRescheduleDate(index, "fromAddedDemo")
     }
 
@@ -711,7 +724,7 @@ else{
     let tempInpVal  = reScheduleStudentData;
     console.log("indexing value =",reScheduleStudentData[index])
     tempInpVal[index].status = value;
-    console.log("status value =",index,value, tempInpVal)
+    console.log("status value =",index,value,tempInpVal)
 
     setReScheduleStudent(tempInpVal)
 
